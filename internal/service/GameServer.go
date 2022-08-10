@@ -1,6 +1,9 @@
 package service
 
-import "github.com/gin-gonic/gin"
+import (
+	"TSM-Server/cmd/tmd"
+	"github.com/gin-gonic/gin"
+)
 
 type GameServerService struct {
 	Ip            string `json:"ip"`
@@ -15,13 +18,38 @@ type GameServerService struct {
 }
 
 func GetServerInfo(c *gin.Context) {
+	var info GameServerService
+	//tmd.Command("version")
 
+	c.JSON(200, info)
 }
 
 func SetTime(c *gin.Context) {
-
+	t := new(struct {
+		time string
+	})
+	c.ShouldBindJSON(t)
+	//dawn noon dusk midnight
+	tmd.Command(t.time)
+	c.JSON(200, gin.H{"msg": "设置成功"})
 }
 
 func ServerAction(c *gin.Context) {
+	t := new(struct {
+		action string
+	})
+	c.ShouldBindJSON(t)
+	//exit-nosave
+	//save
+	//start restart exit
+	if t.action != "restart" {
+		tmd.Command("exit")
+		tmd.Start()
+	} else if t.action == "start" {
+		tmd.Start()
+	} else {
+		tmd.Command("exit")
+	}
 
+	c.JSON(200, gin.H{"msg": "设置成功"})
 }
