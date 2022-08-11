@@ -3,29 +3,11 @@ package tmd
 import (
 	"fmt"
 	"io"
+	"log"
+	"os"
+	"os/exec"
 	"strings"
 )
-
-//func main() {
-//	path := `./start-tModLoaderServer.sh`
-//	proc := exec.Command("/bin/bash", "-c", path, "-config", "server.config")
-//	stdout, _ := proc.StdoutPipe()
-//	stderr, _ := proc.StderrPipe()
-//	//stdin, _ := proc.StdinPipe()
-//
-//	if err := proc.Start(); err != nil {
-//		log.Printf("Error starting command: %s......", err.Error())
-//		os.Exit(1)
-//	}
-//
-//	go asyncLog(stdout)
-//	go asyncLog(stderr)
-//
-//	if err := proc.Wait(); err != nil {
-//		log.Printf("Error waiting for command execution: %s......", err.Error())
-//	}
-//
-//}
 
 func asyncLog(reader io.ReadCloser) error {
 	cache := ""
@@ -49,7 +31,23 @@ func asyncLog(reader io.ReadCloser) error {
 }
 
 func Start() {
+	path := `./start-tModLoaderServer.sh`
+	proc := exec.Command("/bin/bash", "-c", path, "-config", "server.config")
+	stdout, _ := proc.StdoutPipe()
+	stderr, _ := proc.StderrPipe()
+	//stdin, _ := proc.StdinPipe()
 
+	if err := proc.Start(); err != nil {
+		log.Printf("Error starting command: %s......", err.Error())
+		os.Exit(1)
+	}
+
+	go asyncLog(stdout)
+	go asyncLog(stderr)
+
+	if err := proc.Wait(); err != nil {
+		log.Printf("Error waiting for command execution: %s......", err.Error())
+	}
 }
 
 func Command(cmd string) {
