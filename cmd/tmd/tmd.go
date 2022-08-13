@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"os"
 	"os/exec"
 	"strings"
 )
@@ -19,13 +18,12 @@ var (
 	cmdline   = NewQueue()
 )
 
-func init() {
-	if err := proc.Start(); err != nil {
-		log.Printf("Error starting command: %s......", err.Error())
-		os.Exit(1)
-	}
-
-}
+//func init() {
+//	if err := proc.Start(); err != nil {
+//		log.Printf("Error starting command: %s......", err.Error())
+//		os.Exit(1)
+//	}
+//}
 
 func Start(start chan bool) {
 	go asyncLog(stdout)

@@ -2,50 +2,58 @@ package service
 
 import (
 	"TSM-Server/cmd/tmd"
+	"TSM-Server/internal/serializer"
 	"TSM-Server/utils"
-	"github.com/gin-gonic/gin"
-	"log"
 )
 
 type PlayerService struct {
+	nickname string
+	ip       string
+}
+
+type Player struct {
 	Id       string `json:"id"`
 	Nickname string `json:"nickname"`
 	Ip       string `json:"ip"`
 	Ban      bool   `json:"ban"`
 }
 
-func GetPlayerInfo(c *gin.Context) {
-	var list []PlayerService
-	tmd.Command("playing")
-	c.JSON(200, list)
+// GetPlayerInfoService wip
+func (s *PlayerService) GetPlayerInfoService() serializer.Response {
+	result := tmd.Command("playing")
+	return serializer.Response{
+		Data:  "",
+		Msg:   result,
+		Error: "",
+	}
 }
 
-func KicPlayer(c *gin.Context) {
-	var t PlayerService
-	c.BindJSON(t)
-	tmd.Command("kick " + t.Nickname)
-	c.JSON(200, gin.H{"msg": t.Nickname + "has left"})
+func (s *PlayerService) KicPlayerService() serializer.Response {
+	result := tmd.Command("kick " + s.nickname)
+	return serializer.Response{
+		Data:  "",
+		Msg:   result,
+		Error: "",
+	}
 }
 
-func BlockPlayer(c *gin.Context) {
-	var t PlayerService
-	c.BindJSON(t)
-	tmd.Command("ban " + t.Nickname)
-	c.JSON(200, gin.H{"msg": t.Nickname + "has left"})
+func (s *PlayerService) BlockPlayerService() serializer.Response {
+	result := tmd.Command("ban " + s.nickname)
+	return serializer.Response{
+		Data:  "",
+		Msg:   result,
+		Error: "",
+	}
 }
 
-func DelPlayer(c *gin.Context) {
-	var t PlayerService
-	c.BindJSON(t)
-
+func (s *PlayerService) DelPlayerService() serializer.Response {
 	//t.Ip,t.Nickname
 	//打开ban list文件并删除
-	if err := utils.RemoveFromBanList(t.Ip); err != nil {
-		log.Println(err)
+	err1 := utils.RemoveFromBanList(s.ip)
+	err2 := utils.RemoveFromBanList(s.nickname)
+	return serializer.Response{
+		Data:  "",
+		Msg:   "已删除",
+		Error: err1.Error() + err2.Error(),
 	}
-	if err := utils.RemoveFromBanList(t.Nickname); err != nil {
-		log.Println(err)
-	}
-
-	c.JSON(200, gin.H{"msg": "success"})
 }

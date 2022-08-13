@@ -54,6 +54,19 @@ func write(file string, lines []string, filter string) error {
 	}
 	return nil
 }
+func ReadServerConfig(conf string) (string, error) {
+	lines, err := read("./config/serverconfig.txt")
+	if err != nil {
+		return "", err
+	}
+	for _, line := range lines {
+		if strings.Contains(line, conf+"=") && !strings.HasPrefix(line, "#") {
+			res := strings.TrimLeft(line, conf+"=")
+			return res, nil
+		}
+	}
+	return "Unable to get", nil
+}
 func RemoveFromBanList(name string) error {
 	lines, err := read("./config/banlist.txt")
 	if err != nil {

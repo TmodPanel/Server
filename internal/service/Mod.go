@@ -1,12 +1,14 @@
 package service
 
 import (
+	"TSM-Server/internal/serializer"
 	"TSM-Server/utils"
-	"github.com/gin-gonic/gin"
-	"log"
 )
 
 type ModService struct {
+	id     string
+	name   string
+	enable bool
 }
 
 type Mod struct {
@@ -15,11 +17,15 @@ type Mod struct {
 	Enable bool   `json:"Enable"`
 }
 
-func (s *ModService) GetModInfoService() []Mod {
+func (s *ModService) GetModInfoService() serializer.Response {
 	var list []Mod
 	mods, err := utils.GetModInfo()
 	if err != nil {
-		log.Println(err)
+		return serializer.Response{
+			Data:  nil,
+			Error: err.Error(),
+			Msg:   "获取mod信息失败",
+		}
 	}
 	i := 0
 	for k, v := range mods {
@@ -27,30 +33,35 @@ func (s *ModService) GetModInfoService() []Mod {
 		list = append(list, t)
 		i++
 	}
-	return list
+	return serializer.Response{
+		Data:  list,
+		Msg:   "获取到mod信息",
+		Error: err.Error(),
+	}
 }
 
-func (s *ModService) ModAction() {
-	var t Mod
-
-	if t.Enable {
-		if err := utils.EnableMod(t.Name); err != nil {
-			log.Println(err)
-		}
-	} else {
-		if err := utils.RemoveFromEnable(t.Name); err != nil {
-			log.Println(err)
+func (s *ModService) ModActionService() serializer.Response {
+	if s.enable {
+		if err := utils.EnableMod(s.name); err != nil {
+			return serializer.Response{
+				Data:  nil,
+				Msg:   "获取到mod信息",
+				Error: err.Error(),
+			}
 		}
 	}
-	c.JSON(200, nil)
+	return serializer.Response{
+		Data:  nil,
+		Msg:   "获取到mod信息",
+		Error: "",
+	}
 }
 
-func (s *ModService) DelMod() {
-	var t Mod
-	c.ShouldBindJSON(t)
-	//找到mod文件位置并且删除
-	if err := utils.DelMod(t.Name); err != nil {
-		log.Println(err)
+func (s *ModService) DelModService() serializer.Response {
+	err := utils.DelMod(s.name)
+	return serializer.Response{
+		Data:  nil,
+		Msg:   "获取到mod信息",
+		Error: err.Error(),
 	}
-	c.JSON(200, gin.H{"msg": "mod已删除"})
 }
