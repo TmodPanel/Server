@@ -7,30 +7,32 @@ import (
 )
 
 type ModService struct {
+}
+
+type Mod struct {
 	Id     string `json:"id"`
 	Name   string `json:"name"`
 	Enable bool   `json:"Enable"`
 }
 
-func GetModInfo(c *gin.Context) {
-	var list []ModService
+func (s *ModService) GetModInfoService() []Mod {
+	var list []Mod
 	mods, err := utils.GetModInfo()
 	if err != nil {
 		log.Println(err)
 	}
 	i := 0
 	for k, v := range mods {
-		t := ModService{Id: string(i), Name: k, Enable: v}
+		t := Mod{Id: string(i), Name: k, Enable: v}
 		list = append(list, t)
 		i++
 	}
-	c.JSON(200, list)
-
+	return list
 }
 
-func ModAction(c *gin.Context) {
-	var t ModService
-	c.ShouldBindJSON(t)
+func (s *ModService) ModAction() {
+	var t Mod
+
 	if t.Enable {
 		if err := utils.EnableMod(t.Name); err != nil {
 			log.Println(err)
@@ -43,8 +45,8 @@ func ModAction(c *gin.Context) {
 	c.JSON(200, nil)
 }
 
-func DelMod(c *gin.Context) {
-	var t ModService
+func (s *ModService) DelMod() {
+	var t Mod
 	c.ShouldBindJSON(t)
 	//找到mod文件位置并且删除
 	if err := utils.DelMod(t.Name); err != nil {

@@ -13,6 +13,9 @@ func NewRouter() *gin.Engine {
 
 	//登录
 	r.POST("login", nil)
+	//上传
+	r.POST("upload", service.UploadFile)
+
 	api := r.Group("api")
 
 	//服务器
@@ -34,7 +37,7 @@ func NewRouter() *gin.Engine {
 		//启用、禁用
 		v2.POST("action", service.ModAction)
 		//删除
-		v2.POST("del", service.DelMod)
+		//v2.POST("del", service.DelMod)
 	}
 
 	//玩家

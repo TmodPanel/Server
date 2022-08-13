@@ -3,6 +3,8 @@ package service
 import (
 	"TSM-Server/cmd/tmd"
 	"github.com/gin-gonic/gin"
+	"io"
+	"net/http"
 )
 
 type GameServerService struct {
@@ -20,6 +22,13 @@ type GameServerService struct {
 func GetServerInfo(c *gin.Context) {
 	var info GameServerService
 	//tmd.Command("version")
+	resp, err := http.Get("https://myexternalip.com/raw")
+	if err != nil {
+		info.Ip = ""
+	} else {
+		body, _ := io.ReadAll(resp.Body)
+		info.Ip = string(body)
+	}
 
 	c.JSON(200, info)
 }
@@ -43,10 +52,9 @@ func ServerAction(c *gin.Context) {
 	//save
 	//start restart exit
 	if t.action != "restart" {
-		tmd.Command("exit")
-		tmd.Start()
+
 	} else if t.action == "start" {
-		tmd.Start()
+
 	} else {
 		tmd.Command("exit")
 	}
