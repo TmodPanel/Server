@@ -31,9 +31,10 @@ func main() {
 	res := tmd.Command("version")
 	log.Println("res is", res)
 	time.Sleep(10 * time.Second)
-	fmt.Println("10s after")
-	res = tmd.Command("password")
-	log.Println("res is", res)
+
+	log.Println(tmd.CheckStart())
+
 	<-done
 	fmt.Println("进程被终止")
+
 }

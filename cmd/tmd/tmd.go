@@ -1,11 +1,14 @@
 package tmd
 
 import (
+	"TSM-Server/utils"
 	"fmt"
 	"io"
 	"log"
+	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 var (
@@ -15,21 +18,21 @@ var (
 	stdin, _  = proc.StdinPipe()
 	stderr, _ = proc.StderrPipe()
 	ch        = make(chan bool)
-	cmdline   = NewQueue()
+	//命令队列
+	cmdInput = utils.NewQueue()
+	//消息堆栈
+	message = utils.NewStack()
+	started = false
 )
 
-//func init() {
-//	if err := proc.Start(); err != nil {
-//		log.Printf("Error starting command: %s......", err.Error())
-//		os.Exit(1)
-//	}
-//}
-
 func Start(start chan bool) {
+	if err := proc.Start(); err != nil {
+		log.Printf("Error starting command: %s......", err.Error())
+		os.Exit(1)
+	}
 	go asyncLog(stdout)
 	go asyncLog(stderr)
 	go Command("")
-
 	ok := <-ch
 	start <- ok
 	log.Println("Server started")
@@ -40,28 +43,25 @@ func Start(start chan bool) {
 }
 
 func Command(cmd string) string {
+	cmdInput.Push(cmd)
 	fmt.Println(cmd, "start work")
 	_, err := io.WriteString(stdin, cmd+"\n")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(cmd, "end of work")
-	res := ""
-	for {
-		res = cmdline.Pop()
-		if strings.Contains(res, ":") || res == "" {
-			continue
-		} else {
-			break
-		}
+	time.Sleep(1500 * time.Millisecond)
+	res := message.Pop()
+	if strings.HasPrefix(res, ": ") {
+		return strings.TrimPrefix(res, ": ")
 	}
 	return res
+
 }
 
 func asyncLog(reader io.ReadCloser) {
 	cache := ""
 	buf := make([]byte, 1024, 1024)
-	started := false
 
 	for {
 		num, err := reader.Read(buf)
@@ -78,7 +78,7 @@ func asyncLog(reader io.ReadCloser) {
 			line = line + cache
 			fmt.Println(line)
 			if started {
-				cmdline.Push(line)
+				message.Push(line)
 			}
 			if strings.Contains(line, "Server started") {
 				started = true
@@ -88,23 +88,10 @@ func asyncLog(reader io.ReadCloser) {
 	}
 }
 
-type Queue struct {
-	list []string
-}
-
-func NewQueue() *Queue {
-	list := make([]string, 0)
-	return &Queue{list: list}
-}
-func (q *Queue) Push(data string) {
-	q.list = append(q.list, data)
-}
-
-func (q *Queue) Pop() string {
-	if len(q.list) == 0 {
-		return ""
+func CheckStart() bool {
+	b, _ := exec.Command("ps", "-ef").Output()
+	if strings.Contains(string(b), "start-tModLoaderServer.sh") && started {
+		return true
 	}
-	res := q.list[0]
-	q.list = q.list[1:]
-	return res
+	return false
 }

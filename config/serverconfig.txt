@@ -46,7 +46,7 @@ maxplayers=8
 port=7777
 
 #Set the server password
-#password=p@55w0rd
+password=p@55w0rd
 
 #Set the message of the day
 #motd=Please don抰 cut the purple trees!

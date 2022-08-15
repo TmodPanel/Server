@@ -37,14 +37,14 @@ func (s *ServerService) GetServerInfoService() serializer.Response {
 		info.Ip = string(body)
 	}
 	info.Seed = tmd.Command("seed")
-	info.Port = tmd.Command("port")
-	//wip
 	info.Online = tmd.Command("playing")
-	info.Password = tmd.Command("password")
-	info.Time = tmd.Command("time")
+	info.Port, _ = utils.ReadServerConfig("port")
+	info.Password, _ = utils.ReadServerConfig("password")
 	info.World, _ = utils.ReadServerConfig("worldname")
+	info.Time = tmd.Command("time")
+	//
 	version := tmd.Command("version")
-	info.ClientVersion = strings.Split(version, "-")[0]
+	info.ClientVersion = strings.TrimSpace(strings.Split(version, "-")[0])
 	info.ServerVersion = strings.TrimSpace(strings.Split(version, "-")[1])
 
 	return serializer.Response{
@@ -64,20 +64,37 @@ func (s *ServerService) SetTimeService() serializer.Response {
 	}
 }
 
-// ServerActionService  wip
 func (s *ServerService) ServerActionService() serializer.Response {
-	//restart
-	//exit
-	//save
-	if s.action == "exit" {
-		tmd.Command("exit")
-	} else if s.action == "start" {
-		start := make(chan bool)
-		tmd.Start(start)
-	}
-	return serializer.Response{
+	ok := tmd.CheckStart()
+	response := serializer.Response{
 		Data:  "",
-		Msg:   "action success",
+		Msg:   "server has " + s.action,
 		Error: "",
 	}
+	if ok {
+		switch s.action {
+		case "start":
+			break
+		case "exit":
+			tmd.Command("exit")
+			break
+		case "restart":
+			tmd.Command("exit")
+			ch := make(chan bool)
+			go tmd.Start(ch)
+			<-ch
+			break
+		}
+	} else {
+		switch s.action {
+		case "start", "restart":
+			ch := make(chan bool)
+			go tmd.Start(ch)
+			<-ch
+			break
+		case "exit":
+			break
+		}
+	}
+	return response
 }
