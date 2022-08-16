@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/user"
+	"regexp"
 	"strings"
 )
 
@@ -86,17 +87,18 @@ func GetModInfo() (map[string]bool, error) {
 	if err != nil {
 		return nil, err
 	}
-	var all map[string]bool
+	all := make(map[string]bool)
 	for i := 0; i < len(files); i++ {
 		if strings.Contains(files[i].Name(), ".tmod") {
-			all[files[i].Name()] = false
+			name := strings.Split(files[i].Name(), ".tmod")[0]
+			all[name] = false
 		}
 	}
-	lines, err := read("./config/enabled.json")
-	for i := 1; i < len(lines)-1; i++ {
-		str := strings.Trim(lines[i], ",")
-		n := len(str)
-		all[str[3:n-1]] = true
+	mods, err := read(ModPath + "enabled.json")
+	valid := regexp.MustCompile("[a-zA-Z]")
+	for i := 1; i < len(mods)-1; i++ {
+		mod := strings.Join(valid.FindAllString(mods[i], -1), "")
+		all[mod] = true
 	}
 	return all, err
 }

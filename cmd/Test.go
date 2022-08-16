@@ -30,9 +30,16 @@ func main() {
 
 	res := tmd.Command("version")
 	log.Println("res is", res)
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
+	tmd.Command("exit")
 
-	log.Println(tmd.CheckStart())
+	time.Sleep(5 * time.Second)
+	log.Println("restart")
+	d := make(chan bool)
+	go tmd.Start(d)
+	<-d
+
+	log.Println("现在服务器是否启动", tmd.CheckStart())
 
 	<-done
 	fmt.Println("进程被终止")

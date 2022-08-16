@@ -6,28 +6,28 @@ import (
 )
 
 func GetPlayerInfo(c *gin.Context) {
-	server := service.PlayerService{}
-	response := server.GetPlayerInfoService()
+	service := service.PlayerService{}
+	response := service.GetPlayerInfoService()
 	c.JSON(200, response)
 }
 
 func KicPlayer(c *gin.Context) {
-	server := service.PlayerService{}
-	c.ShouldBindJSON(server)
-	response := server.KicPlayerService()
+	service := service.PlayerService{}
+	c.ShouldBind(&service)
+	response := service.KicPlayerService()
 	c.JSON(200, response)
 }
 
 func BlockPlayer(c *gin.Context) {
-	server := service.PlayerService{}
-	c.ShouldBindJSON(server)
-	response := server.BlockPlayerService()
+	service := service.PlayerService{}
+	c.ShouldBind(&service)
+	response := service.BlockPlayerService()
 	c.JSON(200, response)
 }
 
 func DelPlayer(c *gin.Context) {
-	server := service.PlayerService{}
-	c.ShouldBindJSON(server)
-	response := server.DelPlayerService()
+	service := service.PlayerService{}
+	c.ShouldBindJSON(&service)
+	response := service.DelPlayerService()
 	c.JSON(200, response)
 }

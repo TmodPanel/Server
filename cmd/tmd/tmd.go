@@ -12,22 +12,28 @@ import (
 )
 
 var (
-	path      = `/home/user/Downloads/tModLoader/start-tModLoaderServer.sh`
-	proc      = exec.Command("/bin/bash", "-c", path, "-config", "server.config")
-	stdout, _ = proc.StdoutPipe()
-	stdin, _  = proc.StdinPipe()
-	stderr, _ = proc.StderrPipe()
-	ch        = make(chan bool)
+	p  *exec.Cmd
+	in io.WriteCloser
+	ch = make(chan bool)
 	//命令队列
 	cmdInput = utils.NewQueue()
 	//消息堆栈
 	message = utils.NewStack()
+	//是否开始
 	started = false
 )
 
-func Start(start chan bool) {
+func Start(start chan bool) error {
+	path := `/home/user/Downloads/tModLoader/start-tModLoaderServer.sh`
+	proc := exec.Command("/bin/bash", "-c", path, "-config", "server.config")
+	p = proc
+	stdout, _ := proc.StdoutPipe()
+	stdin, _ := proc.StdinPipe()
+	in = stdin
+	stderr, _ := proc.StderrPipe()
 	if err := proc.Start(); err != nil {
 		log.Printf("Error starting command: %s......", err.Error())
+		return err
 		os.Exit(1)
 	}
 	go asyncLog(stdout)
@@ -39,24 +45,31 @@ func Start(start chan bool) {
 
 	if err := proc.Wait(); err != nil {
 		log.Printf("Error waiting for command execution: %s......", err.Error())
+		return err
 	}
+	return nil
 }
 
 func Command(cmd string) string {
 	cmdInput.Push(cmd)
 	fmt.Println(cmd, "start work")
-	_, err := io.WriteString(stdin, cmd+"\n")
+	_, err := io.WriteString(in, cmd+"\n")
 	if err != nil {
 		log.Println(err)
 	}
 	fmt.Println(cmd, "end of work")
-	time.Sleep(1500 * time.Millisecond)
+	time.Sleep(1200 * time.Millisecond)
 	res := message.Pop()
+	if res == "" {
+		return "game not start!"
+	}
 	if strings.HasPrefix(res, ": ") {
 		return strings.TrimPrefix(res, ": ")
 	}
+	if cmd == "exit" && started {
+		p.Process.Kill()
+	}
 	return res
-
 }
 
 func asyncLog(reader io.ReadCloser) {

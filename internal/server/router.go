@@ -11,8 +11,12 @@ func NewRouter() *gin.Engine {
 
 	r.Use(middleware.Cors())
 
+	r.POST("ping", func(context *gin.Context) {
+		context.JSON(200, gin.H{"msg": "pong"})
+	})
+
 	//登录
-	r.POST("login", nil)
+	r.POST("login", api.Login)
 	//上传
 	r.POST("upload", api.UploadFile)
 

@@ -4,14 +4,12 @@ import (
 	"TSM-Server/cmd/tmd"
 	"TSM-Server/internal/serializer"
 	"TSM-Server/utils"
-	"io"
-	"net/http"
 	"strings"
 )
 
 type ServerService struct {
-	time   string
-	action string
+	Time   string `json:"time"`
+	Action string `json:"action"`
 }
 
 type Server struct {
@@ -29,50 +27,44 @@ type Server struct {
 // GetServerInfoService  wip
 func (s *ServerService) GetServerInfoService() serializer.Response {
 	var info Server
-	resp, err := http.Get("https://myexternalip.com/raw")
-	if err != nil {
-		info.Ip = ""
-	} else {
-		body, _ := io.ReadAll(resp.Body)
-		info.Ip = string(body)
-	}
+	info.Ip = utils.IpAddress()
 	info.Seed = tmd.Command("seed")
 	info.Online = tmd.Command("playing")
 	info.Port, _ = utils.ReadServerConfig("port")
 	info.Password, _ = utils.ReadServerConfig("password")
 	info.World, _ = utils.ReadServerConfig("worldname")
 	info.Time = tmd.Command("time")
-	//
 	version := tmd.Command("version")
-	info.ClientVersion = strings.TrimSpace(strings.Split(version, "-")[0])
-	info.ServerVersion = strings.TrimSpace(strings.Split(version, "-")[1])
+	if version == "game not start!" {
+		info.ServerVersion = ""
+		info.ClientVersion = ""
+	} else {
+		info.ClientVersion = strings.TrimSpace(strings.Split(version, "-")[0])
+		info.ServerVersion = strings.TrimSpace(strings.Split(version, "-")[1])
+	}
 
 	return serializer.Response{
-		Data:  info,
-		Msg:   "返回服务器基本信息",
-		Error: "",
+		Data: info,
+		Msg:  "返回服务器基本信息",
 	}
 }
 
 func (s *ServerService) SetTimeService() serializer.Response {
 	//dawn noon dusk midnight
-	tmd.Command(s.time)
+	tmd.Command(s.Time)
 	return serializer.Response{
-		Data:  "",
-		Msg:   "设置时间" + s.time,
-		Error: "",
+		Msg: "设置时间" + s.Time,
 	}
 }
 
+// ServerActionService 错误处理
 func (s *ServerService) ServerActionService() serializer.Response {
 	ok := tmd.CheckStart()
 	response := serializer.Response{
-		Data:  "",
-		Msg:   "server has " + s.action,
-		Error: "",
+		Msg: "server has " + s.Action,
 	}
 	if ok {
-		switch s.action {
+		switch s.Action {
 		case "start":
 			break
 		case "exit":
@@ -86,7 +78,7 @@ func (s *ServerService) ServerActionService() serializer.Response {
 			break
 		}
 	} else {
-		switch s.action {
+		switch s.Action {
 		case "start", "restart":
 			ch := make(chan bool)
 			go tmd.Start(ch)

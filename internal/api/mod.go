@@ -13,14 +13,14 @@ func GetModInfo(c *gin.Context) {
 
 func ModAction(c *gin.Context) {
 	service := service.ModService{}
-	c.ShouldBindJSON(service)
+	c.ShouldBind(&service)
 	response := service.ModActionService()
 	c.JSON(200, response)
 }
 
 func DelMod(c *gin.Context) {
 	service := service.ModService{}
-	c.ShouldBindJSON(service)
+	c.ShouldBind(&service)
 	response := service.DelModService()
 	c.JSON(200, response)
 }

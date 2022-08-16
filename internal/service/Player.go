@@ -7,8 +7,8 @@ import (
 )
 
 type PlayerService struct {
-	nickname string
-	ip       string
+	Nickname string `json:"nickname"`
+	Ip       string `json:"ip"`
 }
 
 type Player struct {
@@ -22,38 +22,32 @@ type Player struct {
 func (s *PlayerService) GetPlayerInfoService() serializer.Response {
 	result := tmd.Command("playing")
 	return serializer.Response{
-		Data:  "",
-		Msg:   result,
-		Error: "",
+		Msg: result,
 	}
 }
 
 func (s *PlayerService) KicPlayerService() serializer.Response {
-	result := tmd.Command("kick " + s.nickname)
+	result := tmd.Command("kick " + s.Nickname)
 	return serializer.Response{
-		Data:  "",
-		Msg:   result,
-		Error: "",
+		Msg: result,
 	}
 }
 
 func (s *PlayerService) BlockPlayerService() serializer.Response {
-	result := tmd.Command("ban " + s.nickname)
+	result := tmd.Command("ban " + s.Nickname)
 	return serializer.Response{
-		Data:  "",
-		Msg:   result,
-		Error: "",
+		Msg: result,
 	}
 }
 
 func (s *PlayerService) DelPlayerService() serializer.Response {
 	//t.Ip,t.Nickname
 	//打开ban list文件并删除
-	err1 := utils.RemoveFromBanList(s.ip)
-	err2 := utils.RemoveFromBanList(s.nickname)
+	err1 := utils.RemoveFromBanList(s.Ip)
+	err2 := utils.RemoveFromBanList(s.Nickname)
 	return serializer.Response{
 		Data:  "",
 		Msg:   "已删除",
-		Error: err1.Error() + err2.Error(),
+		Error: utils.ErrToString(err1) + utils.ErrToString(err2),
 	}
 }
