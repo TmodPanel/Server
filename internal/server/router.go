@@ -31,6 +31,7 @@ func NewRouter() *gin.Engine {
 		v1.POST("setTime", api.SetTime)
 		//开服、关服、重启
 		v1.POST("action", api.ServerAction)
+
 	}
 
 	//模组
@@ -55,6 +56,21 @@ func NewRouter() *gin.Engine {
 		v3.POST("block", api.BlockPlayer)
 		//从黑名单删除
 		v3.POST("del", api.DelPlayer)
+	}
+
+	//配置
+	v4 := v0.Group("confs")
+	{
+		//配置方案信息
+		v4.POST("Info", api.GetSchemesInfo)
+		//删除配置方案
+		v4.POST("delete", api.DelScheme)
+		//增加配置方案
+		v4.POST("add", api.AddScheme)
+		//修改配置方案
+		v4.POST("update", api.UpdateScheme)
+		//重置配置方案
+		v4.POST("reset", api.ResetScheme)
 	}
 
 	return r

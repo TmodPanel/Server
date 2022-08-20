@@ -1,0 +1,38 @@
+[
+    {
+        "id": "1",
+        "name": "默认配置方案",
+        "maxnum": "8",
+        "password": "",
+        "port": "7777",
+        "map": "空岛生存带师",
+        "language": "zh hans",
+        "motd": "welcome to terraria",
+        "priority": 1,
+        "ip": "",
+        "npcstream": 0,
+        "secure": false,
+        "banlist": false,
+        "upnp": false,
+        "steam": false,
+        "lobby": false
+    },
+    {
+        "id": "2",
+        "name": "默认配置方案",
+        "maxnum": "8",
+        "password": "",
+        "port": "7777",
+        "map": "空岛生存带师",
+        "language": "zh hans",
+        "motd": "welcome to terraria",
+        "priority": 1,
+        "ip": "",
+        "npcstream": 0,
+        "secure": false,
+        "banlist": false,
+        "upnp": false,
+        "steam": false,
+        "lobby": false
+    }
+]

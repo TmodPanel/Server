@@ -1,11 +1,15 @@
 package main
 
 import (
-	"TSM-Server/utils"
+	"TSM-Server/internal/service"
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 )
 
 func main() {
-	ip := utils.IpAddress()
-	fmt.Println(ip)
+	var sz []service.Scheme
+	data, _ := ioutil.ReadFile("./config/schemes/scheme.json")
+	json.Unmarshal(data, &sz)
+	fmt.Println(sz)
 }
