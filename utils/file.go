@@ -3,28 +3,15 @@ package utils
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
-	"os/user"
 	"regexp"
 	"strings"
 )
 
 var (
-	ModPath string
+	ModPath = "~/.local/share/Terraria/tModLoader/Mods/"
 )
 
-func init() {
-	u, err := user.Current()
-	if err != nil {
-		log.Println(err)
-	}
-	if u.Username == "root" {
-		ModPath = fmt.Sprintf("/root/.local/share/Terraria/tModLoader/Mods/")
-	} else {
-		ModPath = fmt.Sprintf("/home/%s/.local/share/Terraria/tModLoader/Mods/", u.Username)
-	}
-}
 func read(file string) ([]string, error) {
 	f, err := os.Open(file)
 	if err != nil {
