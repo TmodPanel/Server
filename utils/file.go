@@ -114,3 +114,6 @@ func DelMod(name string) error {
 	err := os.Remove(ModPath + name + ".tmod")
 	return err
 }
+func WriteServerConf(args []string, file string) {
+	write("./config/schemes/"+file+".txt", args, "^_^")
+}

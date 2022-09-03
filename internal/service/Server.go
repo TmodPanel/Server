@@ -10,6 +10,7 @@ import (
 type ServerService struct {
 	Time   string `json:"time"`
 	Action string `json:"action"`
+	Config string `json:"config"`
 }
 
 type Server struct {
@@ -73,7 +74,7 @@ func (s *ServerService) ServerActionService() serializer.Response {
 		case "restart":
 			tmd.Command("exit")
 			ch := make(chan bool)
-			go tmd.Start(ch)
+			go tmd.Start(ch, s.Config)
 			<-ch
 			break
 		}
@@ -81,7 +82,7 @@ func (s *ServerService) ServerActionService() serializer.Response {
 		switch s.Action {
 		case "start", "restart":
 			ch := make(chan bool)
-			go tmd.Start(ch)
+			go tmd.Start(ch, s.Config)
 			<-ch
 			break
 		case "exit":

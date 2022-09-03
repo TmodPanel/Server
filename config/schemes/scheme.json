@@ -5,17 +5,21 @@
         "maxnum": "8",
         "password": "",
         "port": "7777",
-        "map": "空岛生存带师",
+        "map": {
+            "isnew": true,
+            "size": "Large",
+            "difficult": 2,
+            "seed": "111111111",
+            "worldname": "空岛生存带师"
+        },
         "language": "zh hans",
         "motd": "welcome to terraria",
         "priority": 1,
         "ip": "",
         "npcstream": 0,
-        "secure": false,
-        "banlist": false,
-        "upnp": false,
-        "steam": false,
-        "lobby": false
+        "secure": true,
+        "banlist": true,
+        "upnp": true
     },
     {
         "id": "2",
@@ -23,16 +27,20 @@
         "maxnum": "8",
         "password": "",
         "port": "7777",
-        "map": "空岛生存带师",
-        "language": "zh hans",
+        "map": {
+            "isnew": false,
+            "size": "Large",
+            "difficult": 3,
+            "seed": "",
+            "worldname": "map1"
+        },
+        "language": "en-US",
         "motd": "welcome to terraria",
         "priority": 1,
         "ip": "",
         "npcstream": 0,
-        "secure": false,
-        "banlist": false,
-        "upnp": false,
-        "steam": false,
-        "lobby": false
+        "secure": true,
+        "banlist": true,
+        "upnp": true
     }
 ]

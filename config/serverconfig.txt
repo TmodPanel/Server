@@ -19,8 +19,8 @@
 #-ip <ip address>	Sets the IP address for the server to listen on
 #-forcepriority <priority>	Sets the process priority for this task. If this is used the "priority" setting below will be ignored.
 #-disableannouncementbox   Disables the text announcements Announcement Box makes when pulsed from wire.
-#-announcementboxrange <number>   Sets the announcement box text messaging range in pixels, -1 for serverwide announcements.
-#-seed <seed> Specifies the world seed when using -autocreate
+#-announcementboxrange <number>   Sets the announcement box text messaging rangn pixels,e i -1 for serverwide announcements.
+
 
 #remove the # in front of commands to enable them.
 
@@ -34,7 +34,7 @@ world=/root/.local/share/Terraria/tModLoader/Worlds/Finally.wld
 #seed=AwesomeSeed
 
 #Sets the name of the world when using autocreate
-worldname=Terraria
+#worldname=Terraria
 
 #Sets the difficulty of the world when using autocreate 0(normal), 1(expert)
 #difficulty=1

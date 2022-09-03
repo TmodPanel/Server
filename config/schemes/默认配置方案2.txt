@@ -1,0 +1,11 @@
+maxplayers=8
+port=7777
+password=
+motd=welcome to terraria
+language=en-US
+npcstream=0
+priority=1
+upnp=1
+secure=1
+banlist=banlist.txt
+worldname=map1

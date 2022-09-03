@@ -23,9 +23,14 @@ var (
 	started = false
 )
 
-func Start(start chan bool) error {
+func Start(start chan bool, file string) error {
 	path := `/home/user/Downloads/tModLoader/start-tModLoaderServer.sh`
-	proc := exec.Command("/bin/bash", "-c", path, "-config", "server.config")
+	var proc *exec.Cmd
+	if file == "" {
+		proc = exec.Command("/bin/bash", "-c", path)
+	} else {
+		proc = exec.Command("/bin/bash", "-c", path, "-config", "./config/schemes/"+file+".txt")
+	}
 	p = proc
 	stdout, _ := proc.StdoutPipe()
 	stdin, _ := proc.StdinPipe()
@@ -38,7 +43,7 @@ func Start(start chan bool) error {
 	}
 	go asyncLog(stdout)
 	go asyncLog(stderr)
-	go Command("")
+	go Command("start test")
 	ok := <-ch
 	start <- ok
 	log.Println("Server started")
@@ -51,6 +56,13 @@ func Start(start chan bool) error {
 }
 
 func Command(cmd string) string {
+	if cmd == "start test" {
+		io.WriteString(in, cmd+"\n")
+	} else {
+		if !started {
+			return "game not start!"
+		}
+	}
 	cmdInput.Push(cmd)
 	fmt.Println(cmd, "start work")
 	_, err := io.WriteString(in, cmd+"\n")
@@ -58,11 +70,9 @@ func Command(cmd string) string {
 		log.Println(err)
 	}
 	fmt.Println(cmd, "end of work")
+	//wip
 	time.Sleep(1200 * time.Millisecond)
 	res := message.Pop()
-	if res == "" {
-		return "game not start!"
-	}
 	if strings.HasPrefix(res, ": ") {
 		return strings.TrimPrefix(res, ": ")
 	}
