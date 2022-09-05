@@ -12,9 +12,10 @@ import (
 )
 
 var (
-	p  *exec.Cmd
-	in io.WriteCloser
-	ch = make(chan bool)
+	p      *exec.Cmd
+	in     io.WriteCloser
+	ch     = make(chan bool)
+	player []string
 	//命令队列
 	cmdInput = utils.NewQueue()
 	//消息堆栈
@@ -56,28 +57,33 @@ func Start(start chan bool, file string) error {
 }
 
 func Command(cmd string) string {
+	cmdInput.Push(cmd)
+	if !started {
+		return "game not start!"
+	}
 	if cmd == "start test" {
 		io.WriteString(in, cmd+"\n")
-	} else {
-		if !started {
-			return "game not start!"
+	} else if cmd == "exit" {
+		p.Process.Kill()
+		return "game has been closed."
+	} else if cmd == "playing" {
+		list := ""
+		for i := 0; i < len(player); i++ {
+			list = list + "$" + player[i]
 		}
+		return list
 	}
-	cmdInput.Push(cmd)
+	//写入命令
 	fmt.Println(cmd, "start work")
-	_, err := io.WriteString(in, cmd+"\n")
-	if err != nil {
+	if _, err := io.WriteString(in, cmd+"\n"); err != nil {
 		log.Println(err)
 	}
 	fmt.Println(cmd, "end of work")
-	//wip
-	time.Sleep(1200 * time.Millisecond)
+	//wip 返回结果
+	time.Sleep(500 * time.Millisecond)
 	res := message.Pop()
 	if strings.HasPrefix(res, ": ") {
 		return strings.TrimPrefix(res, ": ")
-	}
-	if cmd == "exit" && started {
-		p.Process.Kill()
 	}
 	return res
 }
@@ -102,6 +108,16 @@ func asyncLog(reader io.ReadCloser) {
 			fmt.Println(line)
 			if started {
 				message.Push(line)
+				if strings.Contains(line, "has joined") {
+					player = append(player, strings.TrimSuffix(line, "has joined."))
+				}
+				if strings.Contains(line, "has left") {
+					for i := 0; i < len(player); i++ {
+						if player[i] == strings.TrimSuffix(line, "has left.") {
+							player = append(player[:i], player[i+1:]...)
+						}
+					}
+				}
 			}
 			if strings.Contains(line, "Server started") {
 				started = true
