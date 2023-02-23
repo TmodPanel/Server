@@ -1,6 +1,7 @@
 # TSM-Server
+是[Tmod-Server-Manager](https://github.com/yishuiwang/Tmod-Server-Manager)的后端地址
 
-## 使用方法
+## 启动
 
 1、从源码中启动服务器
 
