@@ -4,23 +4,23 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	url2 "net/url"
+	"net/url"
 	"os"
 	"strconv"
 	"time"
 )
 
 var (
-	//proxy = "http://localhost:7890"
-	proxy = ""
+	proxy = "http://localhost:7890"
+	//proxy = ""
 )
 
-func DownloadFile(url string, file string, proxy string) error {
+func DownloadFile(path string, file string, proxy string) error {
 	// set http proxy
 	if proxy != "" {
-		proxyUrl, err := url2.Parse(proxy)
+		proxyUrl, err := url.Parse(proxy)
 		if err != nil {
-			fmt.Println("Cannot parse proxy url", err)
+			fmt.Println("Cannot parse proxy path", err)
 			return err
 		}
 		http.DefaultTransport.(*http.Transport).Proxy = http.ProxyURL(proxyUrl)
@@ -28,7 +28,7 @@ func DownloadFile(url string, file string, proxy string) error {
 		http.DefaultTransport.(*http.Transport).Proxy = nil
 	}
 	client := http.Client{Transport: http.DefaultTransport}
-	request, err := http.NewRequest("GET", url, nil)
+	request, err := http.NewRequest("GET", path, nil)
 	if err != nil {
 		fmt.Println("Cannot create request", err)
 		return err

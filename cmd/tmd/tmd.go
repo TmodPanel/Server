@@ -25,7 +25,7 @@ var (
 )
 
 func Start(start chan bool, file string) error {
-	path := `/home/user/Downloads/tModLoader/start-tModLoaderServer.sh`
+	path := `./core/tModLoader/start-tModLoaderServer.sh`
 	var proc *exec.Cmd
 	if file == "" {
 		proc = exec.Command("/bin/bash", "-c", path)

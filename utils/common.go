@@ -31,7 +31,3 @@ func ErrToString(err error) string {
 	}
 	return ""
 }
-
-func ConfGen() {
-
-}

@@ -1,9 +1,12 @@
 package utils
 
 import (
+	"archive/zip"
 	"bufio"
 	"fmt"
+	"io"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -116,4 +119,45 @@ func DelMod(name string) error {
 }
 func WriteServerConf(args []string, file string) {
 	write("./config/schemes/"+file+".txt", args, "^_^")
+}
+func Unzip(zipFilePath string, destDirectory string) error {
+	r, err := zip.OpenReader(zipFilePath)
+	if err != nil {
+		fmt.Println("open zip file failed:", err)
+		return err
+	}
+	defer r.Close()
+
+	// 遍历zip文件中的所有文件
+	for _, f := range r.File {
+		// 打开zip文件中的文件
+		rc, err := f.Open()
+		if err != nil {
+			fmt.Println("open file in zip failed:", err)
+			return err
+		}
+		// 创建目标文件
+		path := filepath.Join(destDirectory, f.Name)
+		if f.FileInfo().IsDir() {
+			os.MkdirAll(path, f.Mode())
+			continue
+		} else {
+			os.MkdirAll(filepath.Dir(path), os.ModePerm)
+		}
+		targetFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
+		if err != nil {
+			fmt.Println("create file failed:", err)
+			return err
+		}
+
+		// 将zip文件中的内容写入目标文件
+		_, err = io.Copy(targetFile, rc)
+		if err != nil {
+			fmt.Println("write file failed:", err)
+			return err
+		}
+	}
+
+	fmt.Println("Zip文件解压缩完成！")
+	return nil
 }

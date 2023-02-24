@@ -2,3 +2,7 @@
 cmd/Test.go
 
 cmd/util.go
+
+.idea/
+
+core/
