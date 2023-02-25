@@ -13,7 +13,7 @@ type ServerService struct {
 	Config string `json:"config"`
 }
 
-type Server struct {
+type Game struct {
 	Ip            string `json:"ip"`
 	Online        string `json:"online"`
 	Password      string `json:"password"`
@@ -26,8 +26,8 @@ type Server struct {
 }
 
 // GetServerInfoService  wip
-func (s *ServerService) GetServerInfoService() serializer.Response {
-	var info Server
+func (s *ServerService) GetGameInfoService() serializer.Response {
+	var info Game
 	info.Ip = utils.IpAddress()
 	info.Seed = tmd.Command("seed")
 	info.Online = tmd.Command("playing")

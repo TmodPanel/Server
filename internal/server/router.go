@@ -3,6 +3,7 @@ package server
 import (
 	"TSM-Server/internal/api"
 	"TSM-Server/middleware"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -22,16 +23,15 @@ func NewRouter() *gin.Engine {
 
 	v0 := r.Group("api")
 
-	//服务器
-	v1 := v0.Group("server")
+	//游戏
+	v1 := v0.Group("game")
 	{
-		//服务器信息
-		v1.POST("Info", api.GetServerInfo)
+		//游戏基本信息
+		v1.POST("Info", api.GetGameInfo)
 		//时间
 		v1.POST("setTime", api.SetTime)
 		//开服、关服、重启
 		v1.POST("action", api.ServerAction)
-
 	}
 
 	//模组
@@ -71,6 +71,13 @@ func NewRouter() *gin.Engine {
 		v4.POST("update", api.UpdateScheme)
 		//重置配置方案
 		v4.POST("reset", api.ResetScheme)
+	}
+
+	//服务器
+	v5 := v0.Group("server")
+	{
+		//服务器信息
+		v5.POST("Info", api.GetServerInfo)
 	}
 
 	return r
