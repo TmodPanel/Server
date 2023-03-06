@@ -2,39 +2,40 @@ package api
 
 import (
 	"TSM-Server/internal/service"
+
 	"github.com/gin-gonic/gin"
 )
 
 func GetSchemesInfo(c *gin.Context) {
-	service := service.SchemeService{}
-	response := service.GetSchemesInfoService()
+	schemeService := service.SchemeService{}
+	response := schemeService.GetSchemesInfoService()
 	c.JSON(200, response)
 }
 
 func AddScheme(c *gin.Context) {
-	service := service.SchemeService{}
-	c.ShouldBindJSON(service)
-	response := service.AddSchemeService()
+	schemeService := service.SchemeService{}
+	c.ShouldBindJSON(schemeService)
+	response := schemeService.AddSchemeService()
 	c.JSON(200, response)
 }
 
 func UpdateScheme(c *gin.Context) {
-	service := service.SchemeService{}
-	c.ShouldBindJSON(service)
-	response := service.UpdateSchemeService()
+	schemeService := service.SchemeService{}
+	c.ShouldBindJSON(schemeService)
+	response := schemeService.UpdateSchemeService()
 	c.JSON(200, response)
 }
 
 func DelScheme(c *gin.Context) {
-	service := service.SchemeService{}
-	c.ShouldBindJSON(service)
-	response := service.DelSchemeService()
+	schemeService := service.SchemeService{}
+	c.ShouldBindJSON(schemeService)
+	response := schemeService.DelSchemeService()
 	c.JSON(200, response)
 }
 
 func ResetScheme(c *gin.Context) {
-	service := service.SchemeService{}
-	c.ShouldBindJSON(service)
-	response := service.ResetSchemeService()
+	schemeService := service.SchemeService{}
+	c.ShouldBindJSON(schemeService)
+	response := schemeService.ResetSchemeService()
 	c.JSON(200, response)
 }

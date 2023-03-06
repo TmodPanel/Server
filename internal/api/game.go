@@ -7,21 +7,21 @@ import (
 )
 
 func GetGameInfo(c *gin.Context) {
-	service := service.ServerService{}
-	response := service.GetGameInfoService()
+	gameService := service.ServerService{}
+	response := gameService.GetGameInfoService()
 	c.JSON(200, response)
 }
 
 func SetTime(c *gin.Context) {
-	service := service.ServerService{}
-	c.ShouldBind(&service)
-	response := service.SetTimeService()
+	gameService := service.ServerService{}
+	c.ShouldBind(&gameService)
+	response := gameService.SetTimeService()
 	c.JSON(200, response)
 }
 
 func ServerAction(c *gin.Context) {
-	service := service.ServerService{}
-	c.ShouldBind(&service)
-	response := service.ServerActionService()
+	gameService := service.ServerService{}
+	c.ShouldBind(&gameService)
+	response := gameService.ServerActionService()
 	c.JSON(200, response)
 }

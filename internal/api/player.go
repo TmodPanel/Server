@@ -2,32 +2,33 @@ package api
 
 import (
 	"TSM-Server/internal/service"
+
 	"github.com/gin-gonic/gin"
 )
 
 func GetPlayerInfo(c *gin.Context) {
-	service := service.PlayerService{}
-	response := service.GetPlayerInfoService()
+	playerService := service.PlayerService{}
+	response := playerService.GetPlayerInfoService()
 	c.JSON(200, response)
 }
 
 func KicPlayer(c *gin.Context) {
-	service := service.PlayerService{}
-	c.ShouldBind(&service)
-	response := service.KicPlayerService()
+	playerService := service.PlayerService{}
+	c.ShouldBind(&playerService)
+	response := playerService.KicPlayerService()
 	c.JSON(200, response)
 }
 
 func BlockPlayer(c *gin.Context) {
-	service := service.PlayerService{}
-	c.ShouldBind(&service)
-	response := service.BlockPlayerService()
+	playerService := service.PlayerService{}
+	c.ShouldBind(&playerService)
+	response := playerService.BlockPlayerService()
 	c.JSON(200, response)
 }
 
 func DelPlayer(c *gin.Context) {
-	service := service.PlayerService{}
-	c.ShouldBindJSON(&service)
-	response := service.DelPlayerService()
+	playerService := service.PlayerService{}
+	c.ShouldBindJSON(&playerService)
+	response := playerService.DelPlayerService()
 	c.JSON(200, response)
 }

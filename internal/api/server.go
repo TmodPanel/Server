@@ -7,7 +7,7 @@ import (
 )
 
 func GetServerInfo(c *gin.Context) {
-	service := service.ServerService{}
-	response := service.GetServerInfoService()
+	serverService := service.ServerService{}
+	response := serverService.GetServerInfoService()
 	c.JSON(200, response)
 }

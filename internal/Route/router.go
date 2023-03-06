@@ -18,8 +18,6 @@ func NewRouter() *gin.Engine {
 
 	//登录
 	r.POST("login", api.Login)
-	//上传
-	r.POST("upload", api.UploadFile)
 
 	v0 := r.Group("api")
 
@@ -43,6 +41,8 @@ func NewRouter() *gin.Engine {
 		v2.POST("action", api.ModAction)
 		//删除
 		v2.POST("del", api.DelMod)
+		//模组列表
+		v2.POST("list", api.GetModList)
 	}
 
 	//玩家
@@ -78,6 +78,19 @@ func NewRouter() *gin.Engine {
 	{
 		//服务器信息
 		v5.POST("Info", api.GetServerInfo)
+	}
+
+	//文件
+	v6 := v0.Group("file")
+	{
+		//文件列表
+		v6.POST("list", api.GetFileList)
+		//删除文件
+		v6.POST("del", api.DelFile)
+		//上传文件
+		v6.POST("upload", api.UploadFile)
+		//下载文件
+		v6.POST("download", api.DownloadFile)
 	}
 
 	return r
