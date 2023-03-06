@@ -7,8 +7,9 @@ import (
 )
 
 type ModService struct {
+	Page   int    `json:"page"`
 	Name   string `json:"name"`
-	Enable bool   `json:"enable"`
+	Action int    `json:"action"`
 }
 
 type Mod struct {
@@ -21,16 +22,13 @@ func (s *ModService) GetModInfoService() serializer.Response {
 	var list []Mod
 	mods, err := utils.GetModInfo()
 	if err != nil {
-		return serializer.Response{
-			Error: utils.ErrToString(err),
-			Msg:   "获取mod信息失败",
-		}
+		return serializer.HandleErr(err, "获取mod信息失败")
 	}
-	i := 1
+	id := 1
 	for k, v := range mods {
-		t := Mod{Id: strconv.Itoa(i), Name: k, Enable: v}
+		t := Mod{Id: strconv.Itoa(id), Name: k, Enable: v}
 		list = append(list, t)
-		i++
+		id++
 	}
 	return serializer.Response{
 		Data: list,
@@ -39,24 +37,40 @@ func (s *ModService) GetModInfoService() serializer.Response {
 }
 
 func (s *ModService) ModActionService() serializer.Response {
-	if s.Enable {
-		err := utils.EnableMod(s.Name)
-		return serializer.Response{
-			Msg:   "已启用" + s.Name,
-			Error: utils.ErrToString(err),
+	if s.Action == 1 {
+		if err := utils.EnableMod(s.Name); err != nil {
+			return serializer.HandleErr(err, "启用失败")
+		}
+	} else if s.Action == 2 {
+		if err := utils.RemoveFromEnable(s.Name); err != nil {
+			return serializer.HandleErr(err, "禁用失败")
+		}
+	} else if s.Action == 3 {
+		if err := utils.DelMod(s.Name); err != nil {
+			return serializer.HandleErr(err, "删除失败")
 		}
 	}
-	err := utils.RemoveFromEnable(s.Name)
 	return serializer.Response{
-		Msg:   "已禁用" + s.Name,
-		Error: utils.ErrToString(err),
+		Msg: "操作成功",
 	}
 }
 
 func (s *ModService) DelModService() serializer.Response {
-	err := utils.DelMod(s.Name)
+	if err := utils.DelMod(s.Name); err != nil {
+		return serializer.HandleErr(err, "删除失败")
+	}
 	return serializer.Response{
-		Msg:   "已删除" + s.Name,
-		Error: utils.ErrToString(err),
+		Msg: "删除成功",
+	}
+}
+
+func (s *ModService) GetModListService() serializer.Response {
+	list, err := utils.GetModList(s.Page)
+	if err != nil {
+		return serializer.HandleErr(err, "获取失败")
+	}
+	return serializer.Response{
+		Data: list,
+		Msg:  "获取成功",
 	}
 }

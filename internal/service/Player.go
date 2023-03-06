@@ -43,11 +43,16 @@ func (s *PlayerService) BlockPlayerService() serializer.Response {
 func (s *PlayerService) DelPlayerService() serializer.Response {
 	//t.Ip,t.Nickname
 	//打开ban list文件并删除
-	err1 := utils.RemoveFromBanList(s.Ip)
-	err2 := utils.RemoveFromBanList(s.Nickname)
+
+	if err := utils.RemoveFromBanList(s.Ip); err != nil {
+		return serializer.HandleErr(err, "删除失败")
+	}
+
+	if err := utils.RemoveFromBanList(s.Nickname); err != nil {
+		return serializer.HandleErr(err, "删除失败")
+	}
+
 	return serializer.Response{
-		Data:  "",
-		Msg:   "已删除",
-		Error: utils.ErrToString(err1) + utils.ErrToString(err2),
+		Msg: "删除成功",
 	}
 }

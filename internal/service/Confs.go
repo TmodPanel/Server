@@ -61,20 +61,47 @@ var (
 	}
 )
 
-func (s SchemeService) GetSchemesInfoService() serializer.Response {
+func GetSchemeList() ([]Scheme, error) {
 	var list []Scheme
-	data, _ := os.ReadFile("./config/schemes/scheme.json")
-	json.Unmarshal(data, &list)
+	data, err := os.ReadFile("./config/schemes/scheme.json")
+	if err != nil {
+		return list, err
+	}
+	err = json.Unmarshal(data, &list)
+	if err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+
+func WriteSchemeList(list []Scheme) error {
+	data, err := json.Marshal(list)
+	if err != nil {
+		return err
+	}
+	err = os.WriteFile("./config/schemes/scheme.json", data, 0777)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (s SchemeService) GetSchemesInfoService() serializer.Response {
+	list, err := GetSchemeList()
+	if err != nil {
+		return serializer.HandleErr(err, "获取配置方案失败")
+	}
 	return serializer.Response{
+		Msg:  "获取配置方案",
 		Data: list,
-		Msg:  "获取到配置方案信息",
 	}
 }
 
 func (s SchemeService) DelSchemeService() serializer.Response {
-	var list []Scheme
-	data, _ := os.ReadFile("./config/schemes/scheme.json")
-	json.Unmarshal(data, &list)
+	list, err := GetSchemeList()
+	if err != nil {
+		return serializer.HandleErr(err, "获取配置方案失败")
+	}
 	var newList []Scheme
 	for i := 0; i < len(list); i++ {
 		if list[i].ID == s.conf.ID {
@@ -82,29 +109,33 @@ func (s SchemeService) DelSchemeService() serializer.Response {
 		}
 		newList = append(newList, list[i])
 	}
-	data, _ = json.Marshal(newList)
-	os.WriteFile("./config/schemes/scheme.json", data, 0777)
+	if err = WriteSchemeList(newList); err != nil {
+		return serializer.HandleErr(err, "删除配置方案失败")
+	}
 	return serializer.Response{
 		Msg: s.conf.Name + "已删除",
 	}
 }
 
 func (s SchemeService) AddSchemeService() serializer.Response {
-	var list []Scheme
-	data, _ := os.ReadFile("./config/schemes/scheme.json")
-	json.Unmarshal(data, &list)
+	list, err := GetSchemeList()
+	if err != nil {
+		return serializer.HandleErr(err, "获取配置方案失败")
+	}
 	list = append(list, s.conf)
-	data, _ = json.Marshal(list)
-	os.WriteFile("./config/schemes/scheme.json", data, 0777)
+	if err = WriteSchemeList(list); err != nil {
+		return serializer.HandleErr(err, "添加配置方案失败")
+	}
 	return serializer.Response{
 		Msg: s.conf.Name + "已添加",
 	}
 }
 
 func (s SchemeService) UpdateSchemeService() serializer.Response {
-	var list []Scheme
-	data, _ := os.ReadFile("./config/schemes/scheme.json")
-	json.Unmarshal(data, &list)
+	list, err := GetSchemeList()
+	if err != nil {
+		return serializer.HandleErr(err, "获取配置方案失败")
+	}
 	var newList []Scheme
 	for i := 0; i < len(list); i++ {
 		if list[i].ID == s.conf.ID {
@@ -113,17 +144,19 @@ func (s SchemeService) UpdateSchemeService() serializer.Response {
 		}
 		newList = append(newList, list[i])
 	}
-	data, _ = json.Marshal(newList)
-	os.WriteFile("./config/schemes/scheme.json", data, 0777)
+	if err = WriteSchemeList(newList); err != nil {
+		return serializer.HandleErr(err, "更新配置方案失败")
+	}
 	return serializer.Response{
 		Msg: s.conf.Name + "已更新",
 	}
 }
 
 func (s SchemeService) ResetSchemeService() serializer.Response {
-	var list []Scheme
-	data, _ := os.ReadFile("./config/schemes/scheme.json")
-	json.Unmarshal(data, &list)
+	list, err := GetSchemeList()
+	if err != nil {
+		return serializer.HandleErr(err, "获取配置方案失败")
+	}
 	var newList []Scheme
 	for i := 0; i < len(list); i++ {
 		if list[i].ID == s.conf.ID {
@@ -132,13 +165,15 @@ func (s SchemeService) ResetSchemeService() serializer.Response {
 		}
 		newList = append(newList, list[i])
 	}
-	data, _ = json.Marshal(newList)
-	os.WriteFile("./config/schemes/scheme.json", data, 0777)
+	if err = WriteSchemeList(newList); err != nil {
+		return serializer.HandleErr(err, "重置配置方案失败")
+	}
 	return serializer.Response{
 		Msg: s.conf.Name + "已重置",
 	}
 }
 
+// GenServerConfig wip
 func GenServerConfig() {
 	var list []Scheme
 	var args []string
