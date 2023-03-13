@@ -11,8 +11,9 @@ import (
 	"github.com/shirou/gopsutil/v3/mem"
 )
 
-//type ServerService struct {
-//}
+type ServerService struct {
+	Id int `json:"id"` // according id to the scheme
+}
 
 type Server struct {
 	Cpu struct {
