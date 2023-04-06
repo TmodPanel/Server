@@ -1,4 +1,4 @@
-package tmd
+package process
 
 import (
 	"bufio"
@@ -33,7 +33,7 @@ type TModProc struct {
 	IsOpen   bool
 }
 
-func NewTModLoader(config string, id int) (*TModProc, error) {
+func NewTModProc(config string, id int) (*TModProc, error) {
 	path := `./core/tModLoader/start-tModLoaderServer.sh`
 	fileInfo, err := os.Stat(path)
 	if err != nil {
@@ -44,7 +44,7 @@ func NewTModLoader(config string, id int) (*TModProc, error) {
 		// if the file is not executable, make it executable
 		err = os.Chmod(path, fileInfo.Mode().Perm()|0100)
 		if err != nil {
-			log.Printf("Error getting file info: %s......", err.Error())
+			log.Printf("Error making file executable: %s......", err.Error())
 			return nil, err
 		}
 	}
@@ -121,7 +121,7 @@ func (t *TModProc) Wait() error {
 
 func (t *TModProc) Stop() error {
 	// send the exit command to the process
-	CommandHandler(t, EXIT)
+	t.Command(EXIT)
 	// wait for the process to exit
 	if err := t.proc.Wait(); err != nil {
 		log.Printf("Error waiting for command: %s......", err.Error())
@@ -129,6 +129,13 @@ func (t *TModProc) Stop() error {
 	}
 	// save the context to the process
 	return t.proc.Process.Kill()
+}
+
+func (t *TModProc) Command(cmd string) string {
+	if t.IsOpen == false {
+		return "Server is not running"
+	}
+	return HandleCmd(t, cmd)
 }
 
 func ServerMonitor(t *TModProc) {
@@ -152,11 +159,4 @@ func ServerMonitor(t *TModProc) {
 		}
 		fmt.Println(line)
 	}
-}
-
-func CommandHandler(t *TModProc, cmd string) string {
-	if t.IsOpen == false {
-		return "Server is not running"
-	}
-	return HandleCmd(t, cmd)
 }

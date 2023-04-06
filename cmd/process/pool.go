@@ -1,4 +1,4 @@
-package tmd
+package process
 
 import "errors"
 
@@ -11,6 +11,14 @@ type ProcessorPool struct {
 	Capacity int
 	Running  int
 	Workers  []*TModProc
+}
+
+var (
+	Pool *ProcessorPool
+)
+
+func init() {
+	Pool, _ = NewProcessorPool(10)
 }
 
 func NewProcessorPool(capacity int) (*ProcessorPool, error) {
