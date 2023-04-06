@@ -1,61 +1,33 @@
 package process
 
 import (
+	"errors"
 	"log"
 	"time"
 )
 
-const (
-	SERVER_STARTED  = "Server started"
-	HAS_JOINED      = "has joined"
-	HAS_LEFT        = "has left"
-	HELP            = "help"
-	PLAYING         = "playing"
-	CLEAR           = "clear"
-	EXIT            = "exit"
-	EXIT_NOSAVE     = "exit-nosave"
-	SAVE            = "save"
-	KICK            = "kick"
-	BAN             = "ban"
-	PASSWORD_SHOW   = "password"
-	PASSWORD_CHANGE = "password set"
-	VERSION         = "version"
-	TIME            = "time"
-	PORT            = "port"
-	MAXPLAYERS      = "maxplayers"
-	SAY             = "say"
-	MOTD_SHOW       = "motd"
-	MOTD_CHANGE     = "motd set"
-	DAWN            = "dawn"
-	NOON            = "noon"
-	DUSK            = "dusk"
-	MIDNIGHT        = "midnight"
-	SETTLE          = "settle"
-	SEED            = "seed"
-	MODLIST         = "modlist"
-)
-
 var (
 	// no return value required
-	notReturnMap map[string]func(*TModProc, string) string
+	notReturnMap map[string]func(*TModProc, string) (string, error)
 	// not used
-	notUsedMap map[string]func(*TModProc, string) string
+	notUsedMap map[string]func(*TModProc, string) (string, error)
 	// require return value
-	requireReturnMap map[string]func(*TModProc, string) string
+	requireReturnMap map[string]func(*TModProc, string) (string, error)
 	// unknown command
-	unknownCmd = func(t *TModProc, cmd string) string {
-		return "unknown command"
+	unknownCmd = func(t *TModProc, cmd string) (string, error) {
+		return "", errors.New("unknown command")
 	}
 )
 
 func init() {
-	noReturn := func(t *TModProc, cmd string) string {
+	noReturn := func(t *TModProc, cmd string) (string, error) {
 		if _, err := t.inPipe.Write([]byte(cmd)); err != nil {
 			log.Printf("Error writing to pipe: %s......", err.Error())
+			return "", err
 		}
-		return "command complete"
+		return "command complete", nil
 	}
-	notReturnMap = map[string]func(*TModProc, string) string{
+	notReturnMap = map[string]func(*TModProc, string) (string, error){
 		DAWN:        noReturn,
 		NOON:        noReturn,
 		DUSK:        noReturn,
@@ -66,26 +38,27 @@ func init() {
 		//KICK:        noReturn,
 		//BAN:         noReturn,
 	}
-	notUsed := func(t *TModProc, cmd string) string {
-		return "command not used"
+	notUsed := func(t *TModProc, cmd string) (string, error) {
+		return "command not used", nil
 	}
-	notUsedMap = map[string]func(*TModProc, string) string{
+	notUsedMap = map[string]func(*TModProc, string) (string, error){
 		HELP:       notUsed,
 		PLAYING:    notUsed,
 		CLEAR:      notUsed,
 		PORT:       notUsed,
 		MAXPLAYERS: notUsed,
 	}
-	requireReturn := func(t *TModProc, cmd string) string {
+	requireReturn := func(t *TModProc, cmd string) (string, error) {
 		if _, err := t.inPipe.Write([]byte(cmd)); err != nil {
 			log.Printf("Error writing to pipe: %s......", err.Error())
+			return "", err
 		}
 		time.Sleep(500 * time.Millisecond) // wait for the command to produce output
 		out := t.message.OutputBuf
 		lastLine := out[len(out)-1]
-		return lastLine
+		return lastLine, nil
 	}
-	requireReturnMap = map[string]func(*TModProc, string) string{
+	requireReturnMap = map[string]func(*TModProc, string) (string, error){
 		VERSION:       requireReturn,
 		TIME:          requireReturn,
 		SAY:           requireReturn,
@@ -99,7 +72,7 @@ func init() {
 	}
 
 }
-func HandleCmd(t *TModProc, cmd string) string {
+func HandleCmd(t *TModProc, cmd string) (string, error) {
 	// which class of command is it?
 	if _, ok := notReturnMap[cmd]; ok {
 		return notReturnMap[cmd](t, cmd)
@@ -119,11 +92,13 @@ var monitorStrings = []struct {
 }{
 	{HAS_JOINED, func(t *TModProc, line string) {
 		now := time.Now()
-		t.ps.players[line] = now
-		t.ps.count++
+		ps := PlayerStatus{
+			Name:     line,
+			JoinTime: now,
+		}
 	}},
 	{HAS_LEFT, func(t *TModProc, line string) {
-		delete(t.ps.players, line)
-		t.ps.count--
+		now := time.Now()
+
 	}},
 }

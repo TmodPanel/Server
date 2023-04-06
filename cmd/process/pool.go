@@ -86,3 +86,20 @@ func (p *ProcessorPool) Stop(id int) error {
 	p.Running--
 	return worker.Stop()
 }
+
+func (p *ProcessorPool) Restart(id int) error {
+	worker, err := p.GetWorker(id)
+	if err != nil {
+		return err
+	}
+	if !worker.IsOpen {
+		return errors.New("worker is already stopped")
+	}
+	p.Running--
+	if err := worker.Stop(); err != nil {
+		return err
+	}
+	go worker.Start()
+	p.Running++
+	return nil
+}
