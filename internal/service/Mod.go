@@ -6,6 +6,12 @@ import (
 	"strconv"
 )
 
+const (
+	EnableMod  = 1
+	DisableMod = 2
+	DelMod     = 3
+)
+
 type ModService struct {
 	Page   int    `json:"page"`
 	Name   string `json:"name"`
@@ -37,17 +43,24 @@ func (s *ModService) GetModInfoService() serializer.Response {
 }
 
 func (s *ModService) ModActionService() serializer.Response {
-	if s.Action == 1 {
-		if err := utils.EnableMod(s.Name); err != nil {
+	action, name := s.Action, s.Name
+	switch action {
+	case EnableMod:
+		if err := utils.EnableMod(name); err != nil {
 			return serializer.HandleErr(err, "启用失败")
 		}
-	} else if s.Action == 2 {
-		if err := utils.RemoveFromEnable(s.Name); err != nil {
+	case DisableMod:
+		if err := utils.RemoveFromEnable(name); err != nil {
 			return serializer.HandleErr(err, "禁用失败")
 		}
-	} else if s.Action == 3 {
-		if err := utils.DelMod(s.Name); err != nil {
+	case DelMod:
+		if err := utils.DelMod(name); err != nil {
 			return serializer.HandleErr(err, "删除失败")
+		}
+	default:
+		return serializer.Response{
+			Status: -1,
+			Msg:    "未知操作",
 		}
 	}
 	return serializer.Response{

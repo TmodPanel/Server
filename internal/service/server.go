@@ -34,6 +34,7 @@ type Server struct {
 	PlatformArch    string `json:"platformArch"`    // ex: x86_64
 }
 
+// GetServerInfoService wip
 func (s *ServerService) GetServerInfoService() serializer.Response {
 	var info Server
 	info.Ip = utils.IpAddress()
@@ -50,8 +51,7 @@ func (s *ServerService) GetServerInfoService() serializer.Response {
 	info.PlatformVersion = hostInfo.PlatformVersion
 	info.PlatformArch = hostInfo.KernelArch
 	return serializer.Response{
-		Data:   info,
-		Msg:    "返回服务器基本信息",
-		Status: 200,
+		Data: info,
+		Msg:  "返回服务器基本信息",
 	}
 }

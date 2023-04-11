@@ -35,8 +35,7 @@ func (service *LoginService) Login() serializer.Response {
 		}
 	}
 	return serializer.Response{
-		Status: -1,
-		Msg:    "登录失败",
-		Error:  "账号或密码错误",
+		Msg:   "登录失败",
+		Error: "账号或密码错误",
 	}
 }

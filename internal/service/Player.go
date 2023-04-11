@@ -1,42 +1,77 @@
 package service
 
 import (
-	"TSM-Server/cmd/tmd"
+	"TSM-Server/cmd/process"
 	"TSM-Server/internal/serializer"
 	"TSM-Server/utils"
 )
 
 type PlayerService struct {
-	Nickname string `json:"nickname"`
 	Ip       string `json:"ip"`
+	Id       int    `json:"id"`
+	Nickname string `json:"nickname"`
 }
 
 type Player struct {
-	Id       string `json:"id"`
-	Nickname string `json:"nickname"`
+	Id       int    `json:"id"`
 	Ip       string `json:"ip"`
 	Ban      bool   `json:"ban"`
+	Nickname string `json:"nickname"`
+	JoinTime string `json:"join_time"`
+	LeftTime string `json:"left_time"`
 }
 
 // GetPlayerInfoService wip
 func (s *PlayerService) GetPlayerInfoService() serializer.Response {
-	result := tmd.Command("playing")
+	proc, err := process.Pool.GetWorker(s.Id)
+	if err != nil {
+		serializer.HandleErr(err, "获取进程失败")
+	}
+
+	list := proc.Ps
+	result := make([]Player, 0)
+	for k, v := range list {
+		result = append(result, Player{
+			Id:       k,
+			Nickname: v.Name,
+			Ip:       "",
+			Ban:      false,
+		})
+	}
+
 	return serializer.Response{
-		Msg: result,
+		Data: result,
+		Msg:  "获取到玩家信息",
 	}
 }
 
 func (s *PlayerService) KicPlayerService() serializer.Response {
-	result := tmd.Command("kick " + s.Nickname)
+	proc, err := process.Pool.GetWorker(s.Id)
+	if err != nil {
+		return serializer.HandleErr(err, "获取进程失败")
+	}
+	_, err = proc.Command(process.KICK + s.Nickname)
+	if err != nil {
+		return serializer.HandleErr(err, "踢出失败")
+	}
+
 	return serializer.Response{
-		Msg: result,
+		Msg: "踢出成功",
 	}
 }
 
 func (s *PlayerService) BlockPlayerService() serializer.Response {
-	result := tmd.Command("ban " + s.Nickname)
+	proc, err := process.Pool.GetWorker(s.Id)
+	if err != nil {
+		return serializer.HandleErr(err, "获取进程失败")
+	}
+	_, err = proc.Command(process.BAN + s.Nickname)
+	if err != nil {
+		return serializer.HandleErr(err, "BAN失败")
+	}
+
 	return serializer.Response{
-		Msg: result,
+		Msg: "BAN成功",
 	}
 }
 

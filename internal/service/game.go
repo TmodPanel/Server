@@ -1,13 +1,13 @@
 package service
 
 import (
-	"TSM-Server/cmd/tmd"
+	"TSM-Server/cmd/process"
 	"TSM-Server/internal/serializer"
 	"TSM-Server/utils"
-	"strings"
 )
 
-type ServerService struct {
+type GameService struct {
+	Id     int    `json:"id"`
 	Time   string `json:"time"`
 	Action string `json:"action"`
 	Config string `json:"config"`
@@ -25,24 +25,30 @@ type Game struct {
 	ClientVersion string `json:"clientVersion"`
 }
 
-// GetServerInfoService  wip
-func (s *ServerService) GetGameInfoService() serializer.Response {
+const (
+	STOP    = "stop"
+	START   = "start"
+	RESTART = "restart"
+)
+
+// GetGameInfoService   wip
+func (s *GameService) GetGameInfoService() serializer.Response {
+	proc, err := process.Pool.GetWorker(s.Id)
+	if err != nil {
+		return serializer.HandleErr(err, "获取进程失败")
+	}
+
 	var info Game
 	info.Ip = utils.IpAddress()
-	info.Seed = tmd.Command("seed")
-	info.Online = tmd.Command("playing")
-	info.Port, _ = utils.ReadServerConfig("port")
-	info.Password, _ = utils.ReadServerConfig("password")
-	info.World, _ = utils.ReadServerConfig("worldname")
-	info.Time = tmd.Command("time")
-	version := tmd.Command("version")
-	if version == "game not start!" {
-		info.ServerVersion = ""
-		info.ClientVersion = ""
-	} else {
-		info.ClientVersion = strings.TrimSpace(strings.Split(version, "-")[0])
-		info.ServerVersion = strings.TrimSpace(strings.Split(version, "-")[1])
-	}
+	info.Seed, _ = proc.Command(process.SEED)
+	info.Online, _ = proc.Command(process.PLAYING)
+	info.Port, _ = utils.ReadServerConfig(process.PORT)
+	info.Password, _ = utils.ReadServerConfig(process.PASSWORD)
+	info.World, _ = utils.ReadServerConfig(process.WORLD)
+	info.Time, _ = proc.Command(process.TIME)
+	version, _ := proc.Command(process.VERSION)
+	info.ServerVersion = version
+	info.ClientVersion = version
 
 	return serializer.Response{
 		Data: info,
@@ -50,44 +56,40 @@ func (s *ServerService) GetGameInfoService() serializer.Response {
 	}
 }
 
-func (s *ServerService) SetTimeService() serializer.Response {
-	//dawn noon dusk midnight
-	tmd.Command(s.Time)
+func (s *GameService) SetTimeService() serializer.Response {
+	proc, err := process.Pool.GetWorker(s.Id)
+	if err != nil {
+		return serializer.HandleErr(err, "获取进程失败")
+	}
+
+	command, err := proc.Command(s.Time)
 	return serializer.Response{
-		Msg: "设置时间" + s.Time,
+		Msg:   command,
+		Error: err.Error(),
 	}
 }
 
 // ServerActionService 错误处理
-func (s *ServerService) ServerActionService() serializer.Response {
-	ok := tmd.CheckStart()
-	response := serializer.Response{
-		Msg: "server has " + s.Action,
-	}
-	if ok {
-		switch s.Action {
-		case "start":
-			break
-		case "exit":
-			tmd.Command("exit")
-			break
-		case "restart":
-			tmd.Command("exit")
-			ch := make(chan bool)
-			go tmd.Start(ch, s.Config)
-			<-ch
-			break
+func (s *GameService) ServerActionService() serializer.Response {
+
+	switch s.Action {
+	case STOP:
+		if err := process.Pool.Stop(s.Id); err != nil {
+			return serializer.HandleErr(err, "停止失败")
 		}
-	} else {
-		switch s.Action {
-		case "start", "restart":
-			ch := make(chan bool)
-			go tmd.Start(ch, s.Config)
-			<-ch
-			break
-		case "exit":
-			break
+		break
+	case START:
+		if err := process.Pool.Run(s.Id); err != nil {
+			return serializer.HandleErr(err, "启动失败")
 		}
+		break
+	case RESTART:
+		if err := process.Pool.Restart(s.Id); err != nil {
+			return serializer.HandleErr(err, "重启失败")
+		}
+		break
 	}
-	return response
+	return serializer.Response{
+		Msg: "执行命令" + s.Action,
+	}
 }
