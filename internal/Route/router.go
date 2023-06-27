@@ -1,4 +1,4 @@
-package server
+package Route
 
 import (
 	"TSM-Server/internal/api"
@@ -12,86 +12,61 @@ func NewRouter() *gin.Engine {
 
 	r.Use(middleware.Cors())
 
-	r.POST("ping", func(context *gin.Context) {
-		context.JSON(200, gin.H{"msg": "pong"})
-	})
+	v1Api := r.Group("/api/v1")
 
-	//登录
-	r.POST("login", api.Login)
-
-	v0 := r.Group("api")
-
-	//游戏
-	v1 := v0.Group("game")
+	gameApi := v1Api.Group("/game")
 	{
-		//游戏基本信息
-		v1.POST("Info", api.GetGameInfo)
-		//时间
-		v1.POST("setTime", api.SetTime)
-		//开服、关服、重启
-		v1.POST("action", api.ServerAction)
+		gameApi.GET("/:id", api.GetGameInfo)          // 获取游戏信息
+		gameApi.PUT("/:id/time", api.SetTime)         // 设置游戏时间
+		gameApi.POST("/:id/action", api.ServerAction) // 执行游戏操作
 	}
 
-	//模组
-	v2 := v0.Group("mod")
+	modApi := v1Api.Group("/mod")
 	{
-		//模组信息
-		v2.POST("Info", api.GetModInfo)
-		//启用、禁用
-		v2.POST("action", api.ModAction)
-		//删除
-		v2.POST("del", api.DelMod)
-		//模组列表
-		v2.POST("list", api.GetModList)
+		modApi.GET("/:id", api.GetModInfo)        // 获取模块信息
+		modApi.POST("/:id/action", api.ModAction) // 执行模块操作
+		modApi.DELETE("/:id", api.DelMod)         // 删除模块
+		modApi.GET("/", api.GetModList)           // 获取模块列表
 	}
 
-	//玩家
-	v3 := v0.Group("player")
+	playerApi := v1Api.Group("/player")
 	{
-		//玩家信息
-		v3.POST("Info", api.GetPlayerInfo)
-		//踢出
-		v3.POST("kick", api.KicPlayer)
-		//加入黑名单
-		v3.POST("block", api.BlockPlayer)
-		//从黑名单删除
-		v3.POST("del", api.DelPlayer)
+		playerApi.GET("/:id", api.GetPlayerInfo)      // 获取玩家信息
+		playerApi.POST("/:id/kick", api.KickPlayer)   // 踢出玩家
+		playerApi.POST("/:id/block", api.BlockPlayer) // 封禁玩家
+		playerApi.DELETE("/:id", api.DelPlayer)       // 删除玩家
 	}
 
-	//配置
-	v4 := v0.Group("confs")
+	configApi := v1Api.Group("/config")
 	{
-		//配置方案信息
-		v4.POST("Info", api.GetSchemesInfo)
-		//删除配置方案
-		v4.POST("delete", api.DelScheme)
-		//增加配置方案
-		v4.POST("add", api.AddScheme)
-		//修改配置方案
-		v4.POST("update", api.UpdateScheme)
-		//重置配置方案
-		v4.POST("reset", api.ResetScheme)
+		configApi.GET("/:id", api.GetSchemesInfo)     // 获取配置信息
+		configApi.DELETE("/:id", api.DelScheme)       // 删除配置
+		configApi.POST("/", api.AddScheme)            // 添加配置
+		configApi.PUT("/:id", api.UpdateScheme)       // 更新配置
+		configApi.POST("/:id/reset", api.ResetScheme) // 重置配置
 	}
 
-	//服务器
-	v5 := v0.Group("server")
+	serverApi := v1Api.Group("/server")
 	{
-		//服务器信息
-		v5.POST("Info", api.GetServerInfo)
+		serverApi.GET("/:id", api.GetServerInfo) // 获取服务器信息
 	}
 
-	//文件
-	v6 := v0.Group("file")
+	fileApi := v1Api.Group("/file")
 	{
-		//文件列表
-		v6.POST("list", api.GetFileList)
-		//删除文件
-		v6.POST("del", api.DelFile)
-		//上传文件
-		v6.POST("upload", api.UploadFile)
-		//下载文件
-		v6.POST("download", api.DownloadFile)
+		fileApi.GET("/", api.GetFileList)     // 获取文件列表
+		fileApi.DELETE("/:id", api.DelFile)   // 删除文件
+		fileApi.POST("/", api.UploadFile)     // 上传文件
+		fileApi.GET("/:id", api.DownloadFile) // 下载文件
 	}
 
+	miscApi := v1Api.Group("/misc")
+	{
+		miscApi.GET("/version", func(context *gin.Context) { // 获取版本信息
+			context.JSON(200, gin.H{"version": "1.0.0"})
+		})
+		miscApi.GET("/ping", func(context *gin.Context) { // ping
+			context.JSON(200, gin.H{"message": "pong"})
+		})
+	}
 	return r
 }
