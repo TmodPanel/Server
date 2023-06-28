@@ -5,15 +5,92 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
+	"strconv"
 	"strings"
+	"time"
 )
 
 var (
 	ModPath = "~/.local/share/Terraria/tModLoader/Mods/"
 )
+
+var (
+	proxy = "http://localhost:7890"
+	//proxy = ""
+)
+
+func setProxy(proxy string) {
+	if proxy != "" {
+		proxyURL, _ := url.Parse(proxy)
+		http.DefaultTransport.(*http.Transport).Proxy = http.ProxyURL(proxyURL)
+	} else {
+		http.DefaultTransport.(*http.Transport).Proxy = nil
+	}
+}
+
+func downloadFile(proxy, path, file string) error {
+	setProxy(proxy)
+
+	resp, err := http.Get(path)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
+	}
+
+	out, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	size, _ := strconv.Atoi(resp.Header.Get("Content-Length"))
+	var written int64
+
+	fmt.Println("Downloading", file, "size:", size/1024, "KB")
+
+	buffer := make([]byte, 8*1024)
+	start := time.Now()
+	for {
+		n, err := resp.Body.Read(buffer)
+		if err != nil && err != io.EOF {
+			return err
+		}
+		if n == 0 {
+			break
+		}
+		written += int64(n)
+		out.Write(buffer[:n])
+
+		elapsed := time.Since(start).Seconds()
+		speed := float64(written) / elapsed / 1024 / 1024
+		percent := float64(written) / float64(size) * 100
+		fmt.Printf("\r%.2f%% %.2fMB/%.2fMB %.2fMB/s", percent, float64(written)/1024/1024, float64(size)/1024/1024, speed)
+	}
+
+	fmt.Println("\nDownload complete")
+	return nil
+}
+
+func DownloadMod(name string) error {
+	// name e.g. CalamityMod
+	mirror := "https://mirror.sgkoi.dev"
+	url := fmt.Sprintf("%s/tModLoader/download.php?Down=mod/%s.tmod", mirror, name)
+	return downloadFile(proxy, url, filepath.Join(ModPath, name+".tmod"))
+}
+func DownloadTModLoader(name string) error {
+	// name e.g. v2022.09.47.33
+	release := "https://github.com/tModLoader/tModLoader/releases"
+	url := fmt.Sprintf("%s/download/%s/tModLoader.zip", release, name)
+	return downloadFile(proxy, url, filepath.Join(ModPath, "tModLoader.zip"))
+}
 
 func read(file string) ([]string, error) {
 	f, err := os.Open(file)
@@ -45,19 +122,7 @@ func write(file string, lines []string, filter string) error {
 	}
 	return nil
 }
-func ReadServerConfig(conf string) (string, error) {
-	lines, err := read("./config/serverconfig.txt")
-	if err != nil {
-		return "", err
-	}
-	for _, line := range lines {
-		if strings.Contains(line, conf+"=") && !strings.HasPrefix(line, "#") {
-			res := strings.TrimLeft(line, conf+"=")
-			return res, nil
-		}
-	}
-	return "Unable to get", nil
-}
+
 func RemoveFromBanList(name string) error {
 	lines, err := read("./config/banlist.txt")
 	if err != nil {
@@ -71,54 +136,6 @@ func ReadUserList() ([]string, error) {
 		return nil, err
 	}
 	return lines, err
-}
-func GetModInfo() (map[string]bool, error) {
-	files, err := os.ReadDir(ModPath)
-	if err != nil {
-		return nil, err
-	}
-	all := make(map[string]bool)
-	for i := 0; i < len(files); i++ {
-		if strings.Contains(files[i].Name(), ".tmod") {
-			name := strings.Split(files[i].Name(), ".tmod")[0]
-			all[name] = false
-		}
-	}
-	mods, err := read(ModPath + "enabled.json")
-	valid := regexp.MustCompile("[a-zA-Z]")
-	for i := 1; i < len(mods)-1; i++ {
-		mod := strings.Join(valid.FindAllString(mods[i], -1), "")
-		all[mod] = true
-	}
-	return all, err
-}
-func RemoveFromEnable(name string) error {
-	lines, err := read(ModPath + "enabled.json")
-	if err != nil {
-		return err
-	}
-	err = write(ModPath+"enabled.json", lines, name)
-	return err
-}
-func EnableMod(name string) error {
-	if err := RemoveFromEnable(name); err != nil {
-		return err
-	}
-	lines, err := read(ModPath + "enabled.json")
-	if err != nil {
-		return err
-	}
-	n := len(lines)
-	lines[n-1] = fmt.Sprintf(`  "%s",`, name)
-	lines = append(lines, "]")
-	return write(ModPath+"enabled.json", lines, "*")
-}
-func DelMod(name string) error {
-	err := os.Remove(ModPath + name + ".tmod")
-	return err
-}
-func WriteServerConf(args []string, file string) {
-	write("./config/schemes/"+file+".txt", args, "^_^")
 }
 func Unzip(zipFilePath string, destDirectory string) error {
 	r, err := zip.OpenReader(zipFilePath)
@@ -160,4 +177,12 @@ func Unzip(zipFilePath string, destDirectory string) error {
 
 	fmt.Println("Zip文件解压缩完成！")
 	return nil
+}
+func RemoveFile(filepath string) error {
+	err := os.Remove(filepath)
+	return err
+}
+func RemoveDir(dir string) error {
+	err := os.RemoveAll(dir)
+	return err
 }

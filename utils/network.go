@@ -1,18 +1,17 @@
 package utils
 
 import (
+	"bytes"
 	"fmt"
-	"io/ioutil"
+	"io"
+	"net"
 	"net/http"
 	"regexp"
 )
 
-func GetPage(page int) string {
+func GetPage(page int) (string, error) {
 	url := fmt.Sprintf("https://mirror.sgkoi.dev/?page=%d", page)
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		panic(err)
-	}
+	req, _ := http.NewRequest("GET", url, nil)
 
 	// Accept-Language
 	req.Header.Set("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8")
@@ -22,22 +21,24 @@ func GetPage(page int) string {
 	client := &http.Client{}
 	resp, err := client.Do(req)
 	if err != nil {
-		panic(err)
+		return "", err
 	}
 	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		panic(err)
+	buf := new(bytes.Buffer)
+
+	if _, err := io.Copy(buf, resp.Body); err != nil {
+		return "", err
 	}
 
-	fmt.Println(len(body))
-
-	return string(body)
+	return buf.String(), nil
 }
 
-func GetModList(page int) map[string][]string {
-	body := GetPage(page)
+func GetModList(page int) (map[string][]string, error) {
+	body, err := GetPage(page)
+	if err != nil {
+		return nil, err
+	}
 
 	// 获取<tbody>标签中的内容
 	re := regexp.MustCompile(`(?s)<tbody>(.*)</tbody>`)
@@ -86,5 +87,24 @@ func GetModList(page int) map[string][]string {
 	mods["authors"] = authors
 	mods["origins"] = origins
 
-	return mods
+	return mods, nil
+}
+
+func IpAddress() string {
+	ip := "localhost"
+	resp, err := http.Get("https://myexternalip.com/raw")
+	if err != nil {
+		addrs, _ := net.InterfaceAddrs()
+		for _, address := range addrs {
+			if ipnet, ok := address.(*net.IPNet); ok && !ipnet.IP.IsLoopback() {
+				if ipnet.IP.To4() != nil {
+					ip = ipnet.IP.String()
+				}
+			}
+		}
+	} else {
+		body, _ := io.ReadAll(resp.Body)
+		ip = string(body)
+	}
+	return ip
 }
