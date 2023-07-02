@@ -1,13 +1,13 @@
 package api
 
 import (
-	"TSM-Server/internal/service"
+	"TSM-Server/internal/modle"
 
 	"github.com/gin-gonic/gin"
 )
 
-func GetServerInfo(c *gin.Context) {
-	serverService := service.ServerService{}
+func GetPanelInfo(c *gin.Context) {
+	serverService := modle.ServerService{}
 	response := serverService.GetServerInfoService()
 	c.JSON(200, response)
 }
