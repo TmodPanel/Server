@@ -17,47 +17,50 @@ func NewRouter() *gin.Engine {
 	v1Api.POST("/login", api.Login)       // 登录
 	v1Api.POST("/register", api.Register) // 注册
 
-	authGroup := v1Api.Group("/auth")
+	authGroup := v1Api.Group("/")
 	authGroup.Use(middleware.AuthMiddleware()) // 添加身份验证中间件
 	{
-		gameApi := v1Api.Group("/game")
+		//instanceApi := authGroup.Group("/instance")
+		//{
+		//	instanceApi.GET("/:id", api.GetInstanceInfo) // 获取游戏信息
+		//	//gameApi.PUT("/:id/time", api.SetTime)         // 设置游戏时间
+		//	instanceApi.POST("/:id/restart", api.RestartInstance) // 重启游戏
+		//	instanceApi.POST("/:id/start", api.StartInstance)     // 启动游戏
+		//	instanceApi.POST("/:id/stop", api.StopInstance)       // 关闭游戏
+		//	instanceApi.DELETE("/:id", api.DelInstance)           // 删除游戏配置
+		//	instanceApi.PUT("/:id", api.UpdateInstance)           // 更新游戏配置
+		//	instanceApi.POST("/", api.AddInstance)                // 添加游戏配置
+		//}
+
+		modApi := authGroup.Group("/mod")
 		{
-			gameApi.GET("/:id", api.GetGameInfo)          // 获取游戏信息
-			gameApi.PUT("/:id/time", api.SetTime)         // 设置游戏时间
-			gameApi.POST("/:id/action", api.ServerAction) // 执行游戏操作
+			modApi.GET("/", api.GetModList)            // 获取模组列表
+			modApi.PUT("/:id/enable", api.EnableMod)   // 启用模组
+			modApi.PUT("/:id/disable", api.DisableMod) // 禁用模组
+			modApi.DELETE("/:id", api.DelMod)          // 删除模组
 		}
 
-		modApi := v1Api.Group("/mod")
+		playerApi := authGroup.Group("/player")
 		{
-			modApi.GET("/:id", api.GetModInfo)        // 获取模块信息
-			modApi.POST("/:id/action", api.ModAction) // 执行模块操作
-			modApi.DELETE("/:id", api.DelMod)         // 删除模块
-			modApi.GET("/", api.GetModList)           // 获取模块列表
-		}
-
-		playerApi := v1Api.Group("/player")
-		{
-			playerApi.GET("/:id", api.GetPlayerInfo)      // 获取玩家信息
+			playerApi.GET("/", api.GetPlayerInfo)         // 获取玩家列表
 			playerApi.POST("/:id/kick", api.KickPlayer)   // 踢出玩家
 			playerApi.POST("/:id/block", api.BlockPlayer) // 封禁玩家
-			playerApi.DELETE("/:id", api.DelPlayer)       // 删除玩家
+			//playerApi.DELETE("/:id", api.DelPlayer)       // 删除玩家
 		}
 
-		configApi := v1Api.Group("/config")
+		schemeApi := authGroup.Group("/scheme")
 		{
-			configApi.GET("/:id", api.GetSchemesInfo)     // 获取配置信息
-			configApi.DELETE("/:id", api.DelScheme)       // 删除配置
-			configApi.POST("/", api.AddScheme)            // 添加配置
-			configApi.PUT("/:id", api.UpdateScheme)       // 更新配置
-			configApi.POST("/:id/reset", api.ResetScheme) // 重置配置
+			schemeApi.GET("/", api.GetSchemesInfo) // 获取配置方案
+			schemeApi.DELETE("/", api.DelScheme)   // 删除配置
+			schemeApi.PUT("/", api.UpdateScheme)   // 更新配置
 		}
 
-		serverApi := v1Api.Group("/server")
+		panelApi := authGroup.Group("/panel")
 		{
-			serverApi.GET("/:id", api.GetServerInfo) // 获取服务器信息
+			panelApi.GET("/info", api.GetPanelInfo) // 获取面板信息
 		}
 
-		fileApi := v1Api.Group("/file")
+		fileApi := authGroup.Group("/file")
 		{
 			fileApi.GET("/", api.GetFileList)     // 获取文件列表
 			fileApi.DELETE("/:id", api.DelFile)   // 删除文件
@@ -75,5 +78,6 @@ func NewRouter() *gin.Engine {
 			context.JSON(200, gin.H{"message": "pong"})
 		})
 	}
+
 	return r
 }
