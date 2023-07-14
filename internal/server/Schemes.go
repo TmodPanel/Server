@@ -23,13 +23,6 @@ type Scheme struct {
 	Banlist   bool   `json:"banlist"`
 	Upnp      bool   `json:"upnp"`
 }
-type Map struct {
-	Isnew     bool   `json:"isnew"`
-	Size      string `json:"size"`
-	Difficult int    `json:"difficult"`
-	Seed      string `json:"seed"`
-	Worldname string `json:"worldname"`
-}
 
 func GetSchemeInfo(instanceName string) serializer.Response {
 	var data Scheme
