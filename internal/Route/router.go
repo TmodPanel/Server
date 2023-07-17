@@ -20,17 +20,16 @@ func NewRouter() *gin.Engine {
 	authGroup := v1Api.Group("/")
 	authGroup.Use(middleware.AuthMiddleware()) // 添加身份验证中间件
 	{
-		//instanceApi := authGroup.Group("/instance")
-		//{
-		//	instanceApi.GET("/:id", api.GetInstanceInfo) // 获取游戏信息
-		//	//gameApi.PUT("/:id/time", api.SetTime)         // 设置游戏时间
-		//	instanceApi.POST("/:id/restart", api.RestartInstance) // 重启游戏
-		//	instanceApi.POST("/:id/start", api.StartInstance)     // 启动游戏
-		//	instanceApi.POST("/:id/stop", api.StopInstance)       // 关闭游戏
-		//	instanceApi.DELETE("/:id", api.DelInstance)           // 删除游戏配置
-		//	instanceApi.PUT("/:id", api.UpdateInstance)           // 更新游戏配置
-		//	instanceApi.POST("/", api.AddInstance)                // 添加游戏配置
-		//}
+		instanceApi := authGroup.Group("/instance")
+		{
+			instanceApi.POST("/", api.AddInstance)        // 添加游戏配置
+			instanceApi.GET("/", api.GetInstanceInfo)     // 获取游戏信息
+			instanceApi.POST("/timer", api.SetGameTime)   // 设置游戏时间
+			instanceApi.POST("/restart", api.RestartGame) // 重启游戏
+			instanceApi.POST("/start", api.StartGame)     // 启动游戏
+			instanceApi.POST("/stop", api.StopGame)       // 关闭游戏
+			instanceApi.DELETE("/", api.DelInstance)      // 删除游戏配置
+		}
 
 		modApi := authGroup.Group("/mod")
 		{
