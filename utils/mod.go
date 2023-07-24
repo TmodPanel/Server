@@ -1,54 +1,64 @@
 package utils
 
 import (
+	"TSM-Server/cmd/setting"
 	"fmt"
 	"os"
-	"regexp"
-	"strings"
+
+	"github.com/goccy/go-json"
 )
 
-func GetModInfo() (map[string]bool, error) {
-	files, err := os.ReadDir(ModPath)
+func DisableMod(modName string, instanceName string) error {
+	enableFilePath := fmt.Sprintf("./data/instance/%s/enable.json", instanceName)
+	file, err := os.ReadFile(enableFilePath)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	all := make(map[string]bool)
-	for i := 0; i < len(files); i++ {
-		if strings.Contains(files[i].Name(), ".tmod") {
-			name := strings.Split(files[i].Name(), ".tmod")[0]
-			all[name] = false
+
+	var data []string
+	err = json.Unmarshal(file, &data)
+	if err != nil {
+		return err
+	}
+
+	for i := 0; i < len(data); i++ {
+		if data[i] == modName {
+			data = append(data[:i], data[i+1:]...)
 		}
 	}
-	mods, err := read(ModPath + "enabled.json")
-	valid := regexp.MustCompile("[a-zA-Z]")
-	for i := 1; i < len(mods)-1; i++ {
-		mod := strings.Join(valid.FindAllString(mods[i], -1), "")
-		all[mod] = true
-	}
-	return all, err
+	file, _ = json.MarshalIndent(data, "", " ")
+	return os.WriteFile(enableFilePath, file, 0644)
 }
-func RemoveFromEnable(name string) error {
-	lines, err := read(ModPath + "enabled.json")
+
+func EnableMod(modName string, instanceName string) error {
+	enableFilePath := fmt.Sprintf("./data/instance/%s/enable.json", instanceName)
+	file, err := os.ReadFile(enableFilePath)
 	if err != nil {
 		return err
 	}
-	err = write(ModPath+"enabled.json", lines, name)
-	return err
-}
-func EnableMod(name string) error {
-	if err := RemoveFromEnable(name); err != nil {
-		return err
-	}
-	lines, err := read(ModPath + "enabled.json")
+
+	var data []string
+	err = json.Unmarshal(file, &data)
 	if err != nil {
 		return err
 	}
-	n := len(lines)
-	lines[n-1] = fmt.Sprintf(`  "%s",`, name)
-	lines = append(lines, "]")
-	return write(ModPath+"enabled.json", lines, "*")
+
+	for i := 0; i < len(data); i++ {
+		if data[i] == modName {
+			return nil
+		}
+	}
+	data = append(data, modName)
+
+	file, _ = json.MarshalIndent(data, "", " ")
+	return os.WriteFile(enableFilePath, file, 0644)
 }
+
+// DelMod wip
 func DelMod(name string) error {
-	err := os.Remove(ModPath + name + ".tmod")
-	return err
+	//err := DisableMod(name)
+	//if err != nil {
+	//	return err
+	//}
+	return os.Remove(setting.ModPath + name + ".tmod")
 }

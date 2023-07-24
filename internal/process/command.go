@@ -35,8 +35,8 @@ func init() {
 		EXIT:        noReturn,
 		EXIT_NOSAVE: noReturn,
 		SAVE:        noReturn,
-		//KICK:        noReturn,
-		//BAN:         noReturn,
+		KICK:        noReturn,
+		BAN:         noReturn,
 	}
 	notUsed := func(t *TModProc, cmd string) (string, error) {
 		return "command not used", nil
@@ -96,9 +96,15 @@ var monitorStrings = []struct {
 			Name:     line,
 			JoinTime: now,
 		}
+		t.Ps = append(t.Ps, ps)
 	}},
 	{HAS_LEFT, func(t *TModProc, line string) {
 		now := time.Now()
-
+		for i, ps := range t.Ps {
+			if ps.Name == line {
+				t.Ps[i].LeftTime = now
+				break
+			}
+		}
 	}},
 }

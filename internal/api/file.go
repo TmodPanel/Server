@@ -1,7 +1,7 @@
 package api
 
 import (
-	"TSM-Server/internal/service"
+	"TSM-Server/internal/server"
 	"fmt"
 	"log"
 
@@ -33,21 +33,21 @@ func DownloadFile(c *gin.Context) {
 }
 
 func GetFileList(c *gin.Context) {
-	fileService := service.FileService{}
+	fileService := server.FileService{}
 	c.ShouldBind(&fileService)
 	response := fileService.GetFileListService()
 	c.JSON(200, response)
 }
 
 //func GetFile(c *gin.Context) {
-//	fileService := service.FileService{}
+//	fileService := server.FileService{}
 //	c.ShouldBind(&fileService)
 //	response := fileService.GetFileService()
 //	c.JSON(200, response)
 //}
 
 func DelFile(c *gin.Context) {
-	fileService := service.FileService{}
+	fileService := server.FileService{}
 	c.ShouldBind(&fileService)
 	response := fileService.DelFileService()
 	c.JSON(200, response)

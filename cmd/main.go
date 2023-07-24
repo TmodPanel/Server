@@ -1,11 +1,11 @@
 package main
 
-import "TSM-Server/utils"
+import (
+	"TSM-Server/internal/Route"
+)
 
 func main() {
-	//r := server.NewRouter()
-	//r.Run(":9000")
-	//utils.DownloadTModLoader("v2022.09.47.33")
-	//utils.DownloadTModLoader("v2022.09.47.33")
-	utils.Unzip("./core/tModLoader.zip", "./core/tModLoader")
+
+	r := Route.NewRouter()
+	r.Run(":9000")
 }

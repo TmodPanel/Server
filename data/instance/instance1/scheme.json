@@ -1,0 +1,22 @@
+{
+	"id": "123456",
+	"name": "MyServer",
+	"maxnum": "50",
+	"password": "mysecretpassword",
+	"port": "25565",
+	"map": {
+		"isnew": false,
+		"size": "medium",
+		"difficult": 1,
+		"seed": "1234567890",
+		"worldname": "MyWorld"
+	},
+	"language": "en",
+	"motd": "Welcome to My Server!",
+	"priority": 0,
+	"ip": "192.168.0.1",
+	"npcstream": 0,
+	"secure": false,
+	"banlist": false,
+	"upnp": false
+}

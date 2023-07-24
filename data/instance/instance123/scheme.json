@@ -1,0 +1,22 @@
+{
+  "ID": "1",
+  "Name": "默认配置方案",
+  "Maxnum": "8",
+  "Password": "",
+  "Port": "7777",
+  "Map": {
+    "Isnew": false,
+    "Size": "Large",
+    "Difficult": 0,
+    "Seed": "",
+    "Worldname": "Terraria"
+  },
+  "Language": "zh-Hans",
+  "Motd": "Welcome to Terraria",
+  "Priority": 1,
+  "IP": "",
+  "Npcstream": 0,
+  "Secure": false,
+  "Banlist": false,
+  "Upnp": false
+}

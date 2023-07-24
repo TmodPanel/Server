@@ -1,4 +1,4 @@
-package service
+package server
 
 import (
 	"TSM-Server/internal/serializer"

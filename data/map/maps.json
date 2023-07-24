@@ -1,0 +1,26 @@
+[
+  {
+    "id": "abc123",
+    "name": "Map1",
+    "seed": "xyz456",
+    "wordSize": "medium",
+    "mode": "adventure",
+    "type": "terrain"
+  },
+  {
+    "id": "def456",
+    "name": "Map2",
+    "seed": "xyz456",
+    "wordSize": "medium",
+    "mode": "adventure",
+    "type": "terrain"
+  },
+  {
+    "id": "ghi789",
+    "name": "Map3",
+    "seed": "xyz456",
+    "wordSize": "medium",
+    "mode": "adventure",
+    "type": "terrain"
+  }
+]

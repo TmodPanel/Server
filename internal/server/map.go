@@ -16,7 +16,7 @@ type Map struct {
 
 var mapJSONPath = "./data/map/maps.json"
 
-func GetMapInfo() ([]Map, error) {
+func GetMapList() ([]Map, error) {
 	f, err := os.ReadFile(mapJSONPath)
 	if err != nil {
 		return nil, err

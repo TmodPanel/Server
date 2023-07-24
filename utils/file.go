@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"TSM-Server/cmd/setting"
 	"archive/zip"
 	"bufio"
 	"fmt"
@@ -12,15 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-)
-
-var (
-	ModPath = "~/.local/share/Terraria/tModLoader/Mods/"
-)
-
-var (
-	proxy = "http://localhost:7890"
-	//proxy = ""
 )
 
 func setProxy(proxy string) {
@@ -83,13 +75,49 @@ func DownloadMod(name string) error {
 	// name e.g. CalamityMod
 	mirror := "https://mirror.sgkoi.dev"
 	url := fmt.Sprintf("%s/tModLoader/download.php?Down=mod/%s.tmod", mirror, name)
-	return downloadFile(proxy, url, filepath.Join(ModPath, name+".tmod"))
+	return downloadFile(setting.Proxy, url, filepath.Join(setting.ModPath, name+".tmod"))
 }
 func DownloadTModLoader(name string) error {
 	// name e.g. v2022.09.47.33
 	release := "https://github.com/tModLoader/tModLoader/releases"
 	url := fmt.Sprintf("%s/download/%s/tModLoader.zip", release, name)
-	return downloadFile(proxy, url, filepath.Join(ModPath, "tModLoader.zip"))
+	return downloadFile(setting.Proxy, url, filepath.Join(setting.ModPath, "tModLoader.zip"))
+}
+
+func CopyFile(source, dest string) error {
+	sourceFile, err := os.Open(source)
+	if err != nil {
+		return err
+	}
+	defer sourceFile.Close()
+
+	destFile, err := os.Create(dest)
+	if err != nil {
+		return err
+	}
+	defer destFile.Close()
+
+	_, err = io.Copy(destFile, sourceFile)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func WriteToFile(filename, data string, perm os.FileMode) error {
+	file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, perm)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	_, err = file.WriteString(data)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func read(file string) ([]string, error) {
@@ -123,13 +151,6 @@ func write(file string, lines []string, filter string) error {
 	return nil
 }
 
-func RemoveFromBanList(name string) error {
-	lines, err := read("./config/banlist.txt")
-	if err != nil {
-		return err
-	}
-	return write("./config/banlist.txt", lines, name)
-}
 func ReadUserList() ([]string, error) {
 	lines, err := read("./config/userList.txt")
 	if err != nil {

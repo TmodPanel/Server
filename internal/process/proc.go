@@ -2,6 +2,7 @@ package process
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io"
 	"log"
@@ -18,8 +19,9 @@ type OutputMessage struct {
 }
 
 type PlayerStatus struct {
-	players map[string]time.Time
-	count   int
+	Name     string
+	JoinTime time.Time
+	LeftTime time.Time
 }
 
 type TModProc struct {
@@ -28,7 +30,7 @@ type TModProc struct {
 	inPipe   io.WriteCloser
 	outPipe  io.ReadCloser
 	message  *OutputMessage
-	ps       *PlayerStatus
+	Ps       []PlayerStatus
 	stopChan chan bool
 	IsOpen   bool
 }
@@ -75,10 +77,7 @@ func NewTModProc(config string, id int) (*TModProc, error) {
 			outputPos:  0,
 			outputSize: 0,
 		},
-		ps: &PlayerStatus{
-			players: make(map[string]time.Time),
-			count:   0,
-		},
+		Ps: []PlayerStatus{},
 	}
 	// add the new process to the list
 	return t, nil
@@ -131,9 +130,9 @@ func (t *TModProc) Stop() error {
 	return t.proc.Process.Kill()
 }
 
-func (t *TModProc) Command(cmd string) string {
+func (t *TModProc) Command(cmd string) (string, error) {
 	if t.IsOpen == false {
-		return "Server is not running"
+		return "", errors.New(SERVER_NOT_RUNNING)
 	}
 	return HandleCmd(t, cmd)
 }

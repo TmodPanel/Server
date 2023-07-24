@@ -1,7 +1,7 @@
-package modle
+package server
 
 import (
-	"TSM-Server/internal/config"
+	"TSM-Server/cmd/setting"
 	"TSM-Server/internal/serializer"
 	"time"
 
@@ -22,8 +22,8 @@ type Panel struct {
 func (s *Panel) GetPanelInfo() serializer.Response {
 	info := Panel{}
 
-	info.Version = config.Cfg.Version
-	info.Port = config.Cfg.Http.Port
+	info.Version = setting.Cfg.Version
+	info.Port = setting.Cfg.Http.Port
 
 	hostInfo, _ := host.Info()
 

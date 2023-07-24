@@ -1,0 +1,10 @@
+version: "1.0.0"
+http:
+  port: 8080
+log:
+  path: "./data/log"
+  level: "info"
+  maxsize: 100 # 单位MB
+  MaxAge: 28 # 保存的最长时间 单位天
+  MaxBackups: 3 # 最多保存的文件个数
+
