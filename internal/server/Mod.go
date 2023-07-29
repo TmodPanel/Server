@@ -41,18 +41,19 @@ func GetModInfo(instanceName string) serializer.Response {
 		return serializer.HandleErr(err, "解析enable.json失败")
 	}
 
-	enableSet := make(map[string]*Mod)
-	for _, v := range list {
-		enableSet[v.ID] = &v
-	}
-	for _, v := range enableData {
-		if _, ok := enableSet[v]; ok {
-			enableSet[v].Enable = true
+	// 根据enable.json中的mod name，将mods.json中的enable字段设置为true
+	var enableSet []Mod
+	for i := 0; i < len(list); i++ {
+		for j := 0; j < len(enableData); j++ {
+			if list[i].Name == enableData[j] {
+				list[i].Enable = true
+			}
 		}
+		enableSet = append(enableSet, list[i])
 	}
 
 	return serializer.Response{
-		Data: list,
+		Data: enableSet,
 		Msg:  "获取到mod信息",
 	}
 }

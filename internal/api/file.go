@@ -33,8 +33,8 @@ func DownloadFile(c *gin.Context) {
 }
 
 func GetFileList(c *gin.Context) {
-	fileService := server.FileService{}
-	c.ShouldBind(&fileService)
+	var fileService server.FileService
+	c.ShouldBindJSON(&fileService)
 	response := fileService.GetFileListService()
 	c.JSON(200, response)
 }

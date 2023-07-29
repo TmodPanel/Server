@@ -15,7 +15,7 @@ type File struct {
 	Path string `json:"path"`
 	Size string `json:"size"`
 	Date string `json:"date"`
-	Type string `json:"type"`
+	Type bool   `json:"type"`
 }
 
 func (s *FileService) GetFileListService() serializer.Response {
@@ -28,13 +28,13 @@ func (s *FileService) GetFileListService() serializer.Response {
 	for _, file := range files {
 		fileInfo, _ := file.Info()
 		if err != nil {
-			// handle the error
+			return serializer.HandleErr(err, "获取文件信息失败")
 		}
 		fileList = append(fileList, File{
 			Name: fileInfo.Name(),
 			Size: strconv.FormatInt(fileInfo.Size(), 10),
-			Date: fileInfo.ModTime().String(),
-			Type: fileInfo.Mode().String(),
+			Date: fileInfo.ModTime().Format("2006-01-02 15:04"),
+			Type: fileInfo.IsDir(),
 			Path: fileInfo.Name(),
 		})
 	}
