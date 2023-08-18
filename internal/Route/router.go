@@ -20,6 +20,7 @@ func NewRouter() *gin.Engine {
 	authGroup := v1Api.Group("/")
 	authGroup.Use(middleware.AuthMiddleware()) // 添加身份验证中间件
 	{
+
 		instanceApi := authGroup.Group("/instance")
 		{
 			instanceApi.POST("/", api.AddInstance)        // 添加游戏配置
@@ -61,11 +62,12 @@ func NewRouter() *gin.Engine {
 
 		fileApi := authGroup.Group("/file")
 		{
-			fileApi.GET("/", api.GetFileList)     // 获取文件列表
-			fileApi.DELETE("/:id", api.DelFile)   // 删除文件
-			fileApi.POST("/", api.UploadFile)     // 上传文件
-			fileApi.GET("/:id", api.DownloadFile) // 下载文件
+			fileApi.POST("/list", api.GetFileList)         // 获取文件列表
+			fileApi.DELETE("/:id", api.DelFile)            // 删除文件
+			fileApi.POST("/upload", api.UploadFile)        // 上传文件
+			fileApi.GET("/download/:id", api.DownloadFile) // 下载文件
 		}
+
 	}
 
 	miscApi := v1Api.Group("/misc")
